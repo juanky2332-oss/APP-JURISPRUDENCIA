@@ -1,0 +1,33 @@
+{
+  "name": "app-jurisprudencia",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Buscador de jurisprudencia española sobre la fuente oficial CENDOJ / Poder Judicial.",
+  "engines": { "node": ">=20.9.0" },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "audit:cendoj": "tsx scripts/auditar-cendoj.ts",
+    "verify": "npm run typecheck && npm run test"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0",
+    "next": "^15.5.4",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "unpdf": "^1.3.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}
