@@ -87,7 +87,7 @@ export function DocumentoOficial({ id, fecha, ecli }: { id: string; fecha: strin
 
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
         <button type="button" onClick={intentarAqui} disabled={proxy === 'probando'}>
-          {proxy === 'probando' ? 'Pidiéndolo a CENDOJ…' : 'Intentar abrirlo desde aquí'}
+          {proxy === 'probando' ? 'Pidiéndolo a CENDOJ…' : 'Probar a servirlo desde la app'}
         </button>
         <button type="button" onClick={copiarUrl}>
           <IconoCopiar tamano={15} />
@@ -99,8 +99,9 @@ export function DocumentoOficial({ id, fecha, ecli }: { id: string; fecha: strin
         <div className="aviso aviso-atencion" style={{ marginBottom: 0 }}>
           <IconoAviso tamano={16} />
           <span>
-            El CGPJ ha interpuesto su control de descargas masivas para esta petición, como hace con cualquier acceso
-            automatizado. Usa el botón de arriba: desde tu navegador sí se abre.
+            El CGPJ ha interpuesto su control de descargas masivas, como hace con cualquier acceso automatizado. Es
+            lo esperable y no es un fallo de la aplicación: usa el botón de arriba, que abre el documento con tu propia
+            sesión.
           </span>
         </div>
       ) : null}

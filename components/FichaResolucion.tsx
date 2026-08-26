@@ -255,6 +255,11 @@ export function FichaResolucion() {
                   Se pide el PDF oficial y se localizan las apariciones literales de tus términos
                   {consulta ? ` («${consulta}»)` : ''}. No se genera ningún resumen ni se reescribe nada.
                 </p>
+                <p style={{ fontSize: 12.6, color: 'var(--texto-tenue)', marginTop: -6 }}>
+                  Para esto hace falta que el CGPJ deje al servidor descargar el documento, y su control de descargas
+                  masivas suele impedirlo. Si lo bloquea, se te dirá y podrás leer el PDF en poderjudicial.es con el
+                  botón de la derecha.
+                </p>
                 <button type="button" onClick={cargarFragmentos} disabled={cargandoTexto}>
                   {cargandoTexto ? 'Analizando el PDF oficial…' : 'Buscar fragmentos en el documento'}
                 </button>
