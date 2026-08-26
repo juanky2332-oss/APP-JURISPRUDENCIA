@@ -1,0 +1,688 @@
+<!DOCTYPE aside PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<aside xmlns:autn="http://schemas.autonomy.com/aci/">
+<div class="filtersidebar">
+<div class="lnksearchfilters">
+<a href="#" onclick="javascript:toggleFilters(this); return false;"><span>FILTROS</span></a>
+<div id="jurisprudenciaresults_filters" class="searchfilters">
+<ul>
+<li class="checkfilters">
+<div class="checkfiltersButton">
+<button class="btn btn-primary" href="#" onclick="javascript:toggleCheckfilters('jurisprudencia');">Filtrar</button>
+</div>
+</li>
+<li class="navfiltro" data-totalhits="23603" data-idtab="jurisprudencia" data-name="JURISDICCION">
+<a href="#" onclick="javascript:toggleFilter(this); return false;" data-idtab="jurisprudencia" data-database="AN">Jurisdicci&oacute;n <i class="pull-right fa fa-caret-down" aria-hidden="true"></i></a><button style="" onclick="javascript:removeCheckfilters('jurisprudencia', 'JURISDICCION', this); return false;" data-l10n-id="results.searchresults.filter.button.delfilter" type="button" class="btn btn-primary btn-sm pull-right delfilter">borrar filtro</button>
+<div id="navpfiltroJurisd" class="navpfiltro nicescroll" style="display:none;" tabindex="0"></div>
+</li>
+<li class="navfiltro" data-totalhits="23603" data-idtab="jurisprudencia" data-name="SUBTIPORESOLUCION">
+<a href="#" onclick="javascript:toggleFilter(this); return false;" data-idtab="jurisprudencia" data-database="AN">Resoluci&oacute;n <i class="pull-right fa fa-caret-down" aria-hidden="true"></i></a><button style="display:none;" onclick="javascript:removeCheckfilters('jurisprudencia', 'SUBTIPORESOLUCION', this); return false;" data-l10n-id="results.searchresults.filter.button.delfilter" type="button" class="btn btn-primary btn-sm pull-right delfilter">borrar filtro</button>
+<div id="navpfiltroResolucion" class="navpfiltro nicescroll" style="display:none;" tabindex="0"></div>
+</li>
+<li class="navfiltro" data-totalhits="23603" data-idtab="jurisprudencia" data-name="TIPOORGANOPUB">
+<a href="#" onclick="javascript:toggleFilter(this); return false;" data-idtab="jurisprudencia" data-database="AN">&Oacute;rgano <i class="pull-right fa fa-caret-down" aria-hidden="true"></i></a><button style="display:none;" id="removeOrg" onclick="javascript:removeCheckfilters('jurisprudencia', 'TIPOORGANOPUB', this); return false;" data-l10n-id="results.searchresults.filter.button.delfilter" type="button" class="btn btn-primary btn-sm pull-right delfilter">borrar filtro</button>
+<div id="navpfiltroOrgano" class="navpfiltro nicescroll" style="display:none;" tabindex="0"></div>
+</li>
+<li class="navfiltro" data-totalhits="23603" data-idtab="jurisprudencia" data-name="ANYO">
+<a href="#" onclick="javascript:toggleFilter(this); return false;" data-idtab="jurisprudencia" data-database="AN">A&ntilde;o <i class="pull-right fa fa-caret-down" aria-hidden="true"></i></a><button style="display:none;" onclick="javascript:removeCheckfilters('jurisprudencia', 'ANYO', this); return false;" data-l10n-id="results.searchresults.filter.button.delfilter" type="button" class="btn btn-primary btn-sm pull-right delfilter">borrar filtro</button>
+<div id="navpfiltroAnyo" class="navpfiltro nicescroll" style="display:none;" tabindex="0"></div>
+</li>
+<li class="navfiltro" data-totalhits="23603" data-idtab="jurisprudencia" data-name="PONENTE">
+<a href="#" onclick="javascript:toggleFilter(this); return false;" data-idtab="jurisprudencia" data-database="AN">Ponente <i class="pull-right fa fa-caret-down" aria-hidden="true"></i></a><button style="display:none;" onclick="javascript:removeCheckfilters('jurisprudencia', 'PONENTE', this); return false;" data-l10n-id="results.searchresults.filter.button.delfilter" type="button" class="btn btn-primary btn-sm pull-right delfilter">borrar filtro</button>
+<div id="navpfiltroPonente" class="navpfiltro nicescroll" style="display:none;" tabindex="0"></div>
+</li>
+<li class="checkfilters">
+<div class="checkfiltersButton">
+<button class="btn btn-primary" href="#" onclick="javascript:toggleCheckfilters('jurisprudencia');">Filtrar</button>
+</div>
+</li>
+</ul>
+</div>
+</div>
+<div class="text-center botonera">
+<a href="#" class="btn btn-default newalert"><img src="/search/img/envbell.png" alt=""> Crear alerta</a>
+</div>
+</div>
+</aside><div class="resultswrapper">
+<div class="toppagination row">
+<form id="frmFilterjurisprudencia" name="frmFilterjurisprudencia" action="#" class="searchform" onsubmit="goToPage('jurisprudencia',$(this).find('.slectnavgoto input').val());">
+<input type="hidden" name="total" id="frmFilterjurisprudencia_total" value="200"><input type="hidden" name="records" id="frmFilterjurisprudencia_records" value="10"><input type="hidden" name="page" id="frmFilterjurisprudencia_page" value="1">
+<div class="col-md-5 numhits hidden-xs">
+<b>23603 resultados</b><span class="limitresults tooltips" title="Solamente se muestran hasta 200 resultados, utilice los filtros para acotar la consulta"> (<i class="fa fa-exclamation-circle" aria-hidden="true"></i> m&aacute;ximo documentos a recuperar 200)</span>
+</div>
+<div class="col-xs-12 col-md-7 sort">
+<div class="pull-right col-xs-12 nopad">
+<div id="jurisprudenciaresults_toppagination" class="pull-right searchpagination top nopad"></div>
+<div class="pull-right sortfield hidden-xs">
+<label for="frmFilterjurisprudencia_cbosort" class="oculta">Ordenar:</label><select id="frmFilterjurisprudencia_cbosort" name="cbosort" onchange="javascript:ordenar('jurisprudencia', true);" class="selectpicker form-control pull-left"><option value="Relevance" data-l10n-id="results.pagination.sort.coincidencia">
+												Coincidencia
+											</option><option value="IN_FECHARESOLUCION:increasing" data-l10n-id="results.pagination.sort.fecha.resol.asc">
+												Fecha Resol. [0..9]
+											</option><option value="IN_FECHARESOLUCION:decreasing" data-l10n-id="results.pagination.sort.fecha.resol.desc" selected="true">
+												Fecha Resol. [9..0]
+											</option><option value="IN_FECHAENTRADA:numberdecreasing">
+												Lo m&aacute;s nuevo
+											</option><option value="IP_TIPOORGANO:alphabetical" data-l10n-id="results.pagination.sort.organo.asc">
+												Organo [a..z]
+											</option><option value="IP_TIPOORGANO:reversealphabetical" data-l10n-id="results.pagination.sort.organo.desc">
+												Organo [z..a]
+											</option></select>
+</div>
+<div class="pull-right hidden-xs">
+<label for="frmFilterjurisprudencia_cboresults" class="hidden-xs cboresults">Ver</label>
+<div class="recordsperpagefield ">
+<select id="frmFilterjurisprudencia_cboresults" onchange="javascript:ordenar('jurisprudencia', true);" class="selectpicker form-control"><option value="10" selected="true">10</option><option value="20">20</option><option value="30">30</option><option value="50">50</option></select>
+</div>
+</div>
+</div>
+</div>
+</form>
+</div>
+<div id="jurisprudenciaresults_searchresults" class="row searchresults">
+<div class="row searchresult doc" id="jurisprudenciaresults_content-11813513" data-ref="11813513" data-db="TS" data-fechares="20260721" data-alertdoc="">
+<div class="col-xs-12 col-sm-12 content">
+<div class="title">
+<a href="#" data-link="https://www.poderjudicial.es/search/AN/openDocument/e9727783b695f895a0a8778d75e36f0d/20260804" onclick="markOpenedDoc($(this));openDocumentNewWindow(this);return false;" class="tooltips new-button hidden-xs" title="Abrir el documento en nueva ventana" data-placement="top" aria-label="Icono Abrir el documento en nueva ventana" data-databasematch="TS" data-reference="11813513" data-statsqueryid="316859404" data-links="arrendamiento urbano desahucio" data-optimize="20260804" data-start="1" data-lang="1"><i class="fa fa-external-link" aria-hidden="true"></i></a><span class="separator hidden-xs">&nbsp;</span><a href="https://www.poderjudicial.es/search/AN/openDocument/e9727783b695f895a0a8778d75e36f0d/20260804" id="ref-11813513" onclick="markOpenedDoc($(this));openDocumentFromHref(this);return false;" data-databasematch="TS" data-reference="11813513" data-statsqueryid="316859404" data-links="arrendamiento urbano desahucio" data-optimize="20260804" data-roj="ATS 7529/2026" data-fechares="20260721" data-alertdoc="" data-start="1" data-lang="1" data-langiso="es">ATS, a 21 de julio de 2026 - ROJ: ATS 7529/2026</a>
+</div>
+<div class="metadatos">
+<ul>
+<li>
+<b>ECLI:ES:TS:2026:7529A</b>
+</li>
+<li>
+<b>Sala de lo Civil</b>
+</li>
+<li>Municipio: <b>Madrid</b>
+</li>
+<li>Ponente: <b>FERNANDO CERD&Aacute; ALBERO</b>
+</li>
+<li>N&ordm; Recurso: <b>3/2026</b>
+</li>
+</ul>
+</div>
+<div class="summary" id="jur-summary-1">
+                                    RESUMEN: <b>Demanda de revisión. Se inadmite</b>
+</div>
+</div>
+<div class="">
+<div class="info pull-right">
+<ul></ul>
+</div>
+</div>
+<div class="col-xs-12 actions">
+<div class="pull-left docactions">
+<ul>
+<li id="jur-leglink-1" class="hidden-xs hidden legislacion" data-toggle="popover" data-a="jur-legdiv-1" data-placement="bottom" data-pos="1">
+<a href="#" onclick="return false;" class="tooltips" title="Legislaci&oacute;n relacionada" data-placement="top">
+								Legislaci&oacute;n <i class="fa fa-angle-down" aria-hidden="true"></i></a>
+</li>
+</ul>
+<div id="jur-legdiv-1" class="showLegRel hidden popover-content"></div>
+</div>
+<div class="pull-right docactions">
+<ul>
+<li class="social tooltips" title="compartir en Facebook" data-placement="bottom">
+<a href="#" class="fb-button" aria-label="Icono compartir en Facebook" data-href="https://www.poderjudicial.es/search/AN/openDocument/e9727783b695f895a0a8778d75e36f0d/20260804" data-title="ROJ: ATS 7529/2026"><i class="fa fa-facebook-square" aria-hidden="true"></i></a>
+</li>
+<li class="social tooltips twitter" title="compartir en Twitter" data-placement="bottom">
+<a href="#" class="twtr-button" aria-label="Icono compartir en Twitter. Pulse para compartir en Twitter" data-href="https://www.poderjudicial.es/search/AN/openDocument/e9727783b695f895a0a8778d75e36f0d/20260804" data-title="ROJ: ATS 7529/2026">
+<svg class="social_twitter" viewBox="0 0 26 26" aria-hidden="true">
+<g>
+<path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path>
+</g>
+</svg>
+</a>
+</li>
+<li class="social tooltips" title="copiar enlace" data-placement="bottom">
+<a href="#" class="cp-button" aria-label="Icono copiar enlace al portapapeles" data-clipboard-text="https://www.poderjudicial.es/search/AN/openDocument/e9727783b695f895a0a8778d75e36f0d/20260804"><i class="fa fa-clipboard" aria-hidden="true"></i></a>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="row searchresult doc" id="jurisprudenciaresults_content-11821530" data-ref="11821530" data-db="AN" data-fechares="20260713" data-alertdoc="">
+<div class="col-xs-12 col-sm-12 content">
+<div class="title">
+<a href="#" data-link="https://www.poderjudicial.es/search/AN/openDocument/631c2b7897316f93a0a8778d75e36f0d/20260814" onclick="markOpenedDoc($(this));openDocumentNewWindow(this);return false;" class="tooltips new-button hidden-xs" title="Abrir el documento en nueva ventana" data-placement="top" aria-label="Icono Abrir el documento en nueva ventana" data-databasematch="AN" data-reference="11821530" data-statsqueryid="316859404" data-links="arrendamiento urbano desahucio" data-optimize="20260814" data-start="2" data-lang="1"><i class="fa fa-external-link" aria-hidden="true"></i></a><span class="separator hidden-xs">&nbsp;</span><a href="https://www.poderjudicial.es/search/AN/openDocument/631c2b7897316f93a0a8778d75e36f0d/20260814" id="ref-11821530" onclick="markOpenedDoc($(this));openDocumentFromHref(this);return false;" data-databasematch="AN" data-reference="11821530" data-statsqueryid="316859404" data-links="arrendamiento urbano desahucio" data-optimize="20260814" data-roj="STICI 608/2026" data-fechares="20260713" data-alertdoc="" data-start="2" data-lang="1" data-langiso="es">STICI Pontevedra, a 13 de julio de 2026 - ROJ: STICI 608/2026</a>
+</div>
+<div class="metadatos">
+<ul>
+<li>
+<b>ECLI:ES:TICI:2026:608</b>
+</li>
+<li>N&ordm; de Resoluci&oacute;n: <b>128/2026</b>
+</li>
+<li>Municipio: <b>Redondela</b>
+</li>
+<li>Ponente: <b>MARIA DEL MAR PAIS BONAMUSA</b>
+</li>
+<li>N&ordm; Recurso: <b>563/2020</b>
+</li>
+</ul>
+</div>
+<div class="summary" id="jur-summary-2">
+                                    RESUMEN: <b><font color=red>ARRENDAMIENTOS</font> <font color=red>URBANOS</font> DETERMINACION RENTAS</b>
+</div>
+</div>
+<div class="">
+<div class="info pull-right">
+<ul></ul>
+</div>
+</div>
+<div class="col-xs-12 actions">
+<div class="pull-left docactions">
+<ul>
+<li id="jur-leglink-2" class="hidden-xs hidden legislacion" data-toggle="popover" data-a="jur-legdiv-2" data-placement="bottom" data-pos="2">
+<a href="#" onclick="return false;" class="tooltips" title="Legislaci&oacute;n relacionada" data-placement="top">
+								Legislaci&oacute;n <i class="fa fa-angle-down" aria-hidden="true"></i></a>
+</li>
+</ul>
+<div id="jur-legdiv-2" class="showLegRel hidden popover-content"></div>
+</div>
+<div class="pull-right docactions">
+<ul>
+<li class="social tooltips" title="compartir en Facebook" data-placement="bottom">
+<a href="#" class="fb-button" aria-label="Icono compartir en Facebook" data-href="https://www.poderjudicial.es/search/AN/openDocument/631c2b7897316f93a0a8778d75e36f0d/20260814" data-title="ROJ: STICI 608/2026"><i class="fa fa-facebook-square" aria-hidden="true"></i></a>
+</li>
+<li class="social tooltips twitter" title="compartir en Twitter" data-placement="bottom">
+<a href="#" class="twtr-button" aria-label="Icono compartir en Twitter. Pulse para compartir en Twitter" data-href="https://www.poderjudicial.es/search/AN/openDocument/631c2b7897316f93a0a8778d75e36f0d/20260814" data-title="ROJ: STICI 608/2026">
+<svg class="social_twitter" viewBox="0 0 26 26" aria-hidden="true">
+<g>
+<path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path>
+</g>
+</svg>
+</a>
+</li>
+<li class="social tooltips" title="copiar enlace" data-placement="bottom">
+<a href="#" class="cp-button" aria-label="Icono copiar enlace al portapapeles" data-clipboard-text="https://www.poderjudicial.es/search/AN/openDocument/631c2b7897316f93a0a8778d75e36f0d/20260814"><i class="fa fa-clipboard" aria-hidden="true"></i></a>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="row searchresult doc" id="jurisprudenciaresults_content-11825219" data-ref="11825219" data-db="AN" data-fechares="20260710" data-alertdoc="">
+<div class="col-xs-12 col-sm-12 content">
+<div class="title">
+<a href="#" data-link="https://www.poderjudicial.es/search/AN/openDocument/ccffef1d549af52fa0a8778d75e36f0d/20260820" onclick="markOpenedDoc($(this));openDocumentNewWindow(this);return false;" class="tooltips new-button hidden-xs" title="Abrir el documento en nueva ventana" data-placement="top" aria-label="Icono Abrir el documento en nueva ventana" data-databasematch="AN" data-reference="11825219" data-statsqueryid="316859404" data-links="arrendamiento urbano desahucio" data-optimize="20260820" data-start="3" data-lang="1"><i class="fa fa-external-link" aria-hidden="true"></i></a><span class="separator hidden-xs">&nbsp;</span><a href="https://www.poderjudicial.es/search/AN/openDocument/ccffef1d549af52fa0a8778d75e36f0d/20260820" id="ref-11825219" onclick="markOpenedDoc($(this));openDocumentFromHref(this);return false;" data-databasematch="AN" data-reference="11825219" data-statsqueryid="316859404" data-links="arrendamiento urbano desahucio" data-optimize="20260820" data-roj="STIC 1066/2026" data-fechares="20260710" data-alertdoc="" data-start="3" data-lang="1" data-langiso="es">STIC &Aacute;lava, a 10 de julio de 2026 - ROJ: STIC 1066/2026</a>
+</div>
+<div class="metadatos">
+<ul>
+<li>
+<b>ECLI:ES:TIC:2026:1066</b>
+</li>
+<li>N&ordm; de Resoluci&oacute;n: <b>321/2026</b>
+</li>
+<li>Municipio: <b>Vitoria-Gasteiz</b>
+</li>
+<li>Ponente: <b>CRISTINA RODRIGUEZ RUIZ</b>
+</li>
+<li>N&ordm; Recurso: <b>1509/2025</b>
+</li>
+</ul>
+</div>
+<div class="summary" id="jur-summary-3">
+                                   Resumen Autom&aacute;tico: <b>de <font color=red>desahucio</font> si no abandona la vivienda., así como al abono de las rentas devengadas, que a la fecha de la vista ascienden a 8318,08 euros, más las que se devenguen hasta el efectivo desalojo. A ello se opone la demandada por entender que es vulnerable, reconociendo la deuda. No se niega por lo tanto ni la fecha de contratación, ni la comunicación fehaciente realizada por la arrendadora de su voluntad de extinguir el contrato, siendo el único punto de discusión la vulnerabilidad del demandado. SEGUNDO.- El artículo 9.1 de la Ley 29/1994, de 24 de noviembre, de <font color=red>Arrendamientos</font> <font color=red>Urbano</font> .dispone que la duración del <font color=red>arrendamiento</font> será libremente pactada por las partes. Si esta fuera inferior a cinco años, o inferior a siete años si el arrendador fuese persona jurídica, llegado el día del vencimiento del contrato, este se prorrogará</b>
+</div>
+</div>
+<div class="">
+<div class="info pull-right">
+<ul></ul>
+</div>
+</div>
+<div class="col-xs-12 actions">
+<div class="pull-left docactions">
+<ul>
+<li id="jur-leglink-3" class="hidden-xs hidden legislacion" data-toggle="popover" data-a="jur-legdiv-3" data-placement="bottom" data-pos="3">
+<a href="#" onclick="return false;" class="tooltips" title="Legislaci&oacute;n relacionada" data-placement="top">
+								Legislaci&oacute;n <i class="fa fa-angle-down" aria-hidden="true"></i></a>
+</li>
+</ul>
+<div id="jur-legdiv-3" class="showLegRel hidden popover-content"></div>
+</div>
+<div class="pull-right docactions">
+<ul>
+<li class="social tooltips" title="compartir en Facebook" data-placement="bottom">
+<a href="#" class="fb-button" aria-label="Icono compartir en Facebook" data-href="https://www.poderjudicial.es/search/AN/openDocument/ccffef1d549af52fa0a8778d75e36f0d/20260820" data-title="ROJ: STIC 1066/2026"><i class="fa fa-facebook-square" aria-hidden="true"></i></a>
+</li>
+<li class="social tooltips twitter" title="compartir en Twitter" data-placement="bottom">
+<a href="#" class="twtr-button" aria-label="Icono compartir en Twitter. Pulse para compartir en Twitter" data-href="https://www.poderjudicial.es/search/AN/openDocument/ccffef1d549af52fa0a8778d75e36f0d/20260820" data-title="ROJ: STIC 1066/2026">
+<svg class="social_twitter" viewBox="0 0 26 26" aria-hidden="true">
+<g>
+<path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path>
+</g>
+</svg>
+</a>
+</li>
+<li class="social tooltips" title="copiar enlace" data-placement="bottom">
+<a href="#" class="cp-button" aria-label="Icono copiar enlace al portapapeles" data-clipboard-text="https://www.poderjudicial.es/search/AN/openDocument/ccffef1d549af52fa0a8778d75e36f0d/20260820"><i class="fa fa-clipboard" aria-hidden="true"></i></a>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="row searchresult doc" id="jurisprudenciaresults_content-11825221" data-ref="11825221" data-db="AN" data-fechares="20260710" data-alertdoc="">
+<div class="col-xs-12 col-sm-12 content">
+<div class="title">
+<a href="#" data-link="https://www.poderjudicial.es/search/AN/openDocument/8dd3981cfbeb5071a0a8778d75e36f0d/20260820" onclick="markOpenedDoc($(this));openDocumentNewWindow(this);return false;" class="tooltips new-button hidden-xs" title="Abrir el documento en nueva ventana" data-placement="top" aria-label="Icono Abrir el documento en nueva ventana" data-databasematch="AN" data-reference="11825221" data-statsqueryid="316859404" data-links="arrendamiento urbano desahucio" data-optimize="20260820" data-start="4" data-lang="1"><i class="fa fa-external-link" aria-hidden="true"></i></a><span class="separator hidden-xs">&nbsp;</span><a href="https://www.poderjudicial.es/search/AN/openDocument/8dd3981cfbeb5071a0a8778d75e36f0d/20260820" id="ref-11825221" onclick="markOpenedDoc($(this));openDocumentFromHref(this);return false;" data-databasematch="AN" data-reference="11825221" data-statsqueryid="316859404" data-links="arrendamiento urbano desahucio" data-optimize="20260820" data-roj="STIC 1068/2026" data-fechares="20260710" data-alertdoc="" data-start="4" data-lang="1" data-langiso="es">STIC &Aacute;lava, a 10 de julio de 2026 - ROJ: STIC 1068/2026</a>
+</div>
+<div class="metadatos">
+<ul>
+<li>
+<b>ECLI:ES:TIC:2026:1068</b>
+</li>
+<li>N&ordm; de Resoluci&oacute;n: <b>245/2026</b>
+</li>
+<li>Municipio: <b>Vitoria-Gasteiz</b>
+</li>
+<li>Ponente: <b>SUSANA DIEZ MARTINEZ DE LAHIDALGA</b>
+</li>
+<li>N&ordm; Recurso: <b>1479/2025</b>
+</li>
+</ul>
+</div>
+<div class="summary" id="jur-summary-4">
+                                   Resumen Autom&aacute;tico: <b>D./D.ª , Procurador/a:D./D.ª , OBJETO DEL JUICIO:<font color=red>Arrendamientos</font> <font color=red>Urbanos</font> . Primero.-Por la Procuradora Sra. Marco Saenz de Ormijana, en la representación indicada y mediante escrito que por turno de reparto correspondió a este Juzgado se presentó demanda de juicio verbal de <font color=red>desahucio</font> por expiración de plazo y reclamación de cantidad, en fecha 24 de noviembre de 2025, en la que tras relatar los hechos y alegar los fundamentos de derecho en que se basaba terminó suplicando al Juzgado que admitiera a trámite la demanda y que tras los trámites legales oportunos dictara sentencia por la que se declare el <font color=red>desahucio</font> de la demandada con condena a la expedita entrega del bien arrendado y al pago de la cantidad de 8.396,12 euros, más la cantidad que resulte de sumar las rentas debidas que se devenguen con posterioridad a la presentación de esta</b>
+</div>
+</div>
+<div class="">
+<div class="info pull-right">
+<ul></ul>
+</div>
+</div>
+<div class="col-xs-12 actions">
+<div class="pull-left docactions">
+<ul>
+<li id="jur-leglink-4" class="hidden-xs hidden legislacion" data-toggle="popover" data-a="jur-legdiv-4" data-placement="bottom" data-pos="4">
+<a href="#" onclick="return false;" class="tooltips" title="Legislaci&oacute;n relacionada" data-placement="top">
+								Legislaci&oacute;n <i class="fa fa-angle-down" aria-hidden="true"></i></a>
+</li>
+</ul>
+<div id="jur-legdiv-4" class="showLegRel hidden popover-content"></div>
+</div>
+<div class="pull-right docactions">
+<ul>
+<li class="social tooltips" title="compartir en Facebook" data-placement="bottom">
+<a href="#" class="fb-button" aria-label="Icono compartir en Facebook" data-href="https://www.poderjudicial.es/search/AN/openDocument/8dd3981cfbeb5071a0a8778d75e36f0d/20260820" data-title="ROJ: STIC 1068/2026"><i class="fa fa-facebook-square" aria-hidden="true"></i></a>
+</li>
+<li class="social tooltips twitter" title="compartir en Twitter" data-placement="bottom">
+<a href="#" class="twtr-button" aria-label="Icono compartir en Twitter. Pulse para compartir en Twitter" data-href="https://www.poderjudicial.es/search/AN/openDocument/8dd3981cfbeb5071a0a8778d75e36f0d/20260820" data-title="ROJ: STIC 1068/2026">
+<svg class="social_twitter" viewBox="0 0 26 26" aria-hidden="true">
+<g>
+<path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path>
+</g>
+</svg>
+</a>
+</li>
+<li class="social tooltips" title="copiar enlace" data-placement="bottom">
+<a href="#" class="cp-button" aria-label="Icono copiar enlace al portapapeles" data-clipboard-text="https://www.poderjudicial.es/search/AN/openDocument/8dd3981cfbeb5071a0a8778d75e36f0d/20260820"><i class="fa fa-clipboard" aria-hidden="true"></i></a>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="row searchresult doc" id="jurisprudenciaresults_content-11823982" data-ref="11823982" data-db="AN" data-fechares="20260709" data-alertdoc="">
+<div class="col-xs-12 col-sm-12 content">
+<div class="title">
+<a href="#" data-link="https://www.poderjudicial.es/search/AN/openDocument/0bbfcd68f16c78baa0a8778d75e36f0d/20260818" onclick="markOpenedDoc($(this));openDocumentNewWindow(this);return false;" class="tooltips new-button hidden-xs" title="Abrir el documento en nueva ventana" data-placement="top" aria-label="Icono Abrir el documento en nueva ventana" data-databasematch="AN" data-reference="11823982" data-statsqueryid="316859404" data-links="arrendamiento urbano desahucio" data-optimize="20260818" data-start="5" data-lang="1"><i class="fa fa-external-link" aria-hidden="true"></i></a><span class="separator hidden-xs">&nbsp;</span><a href="https://www.poderjudicial.es/search/AN/openDocument/0bbfcd68f16c78baa0a8778d75e36f0d/20260818" id="ref-11823982" onclick="markOpenedDoc($(this));openDocumentFromHref(this);return false;" data-databasematch="AN" data-reference="11823982" data-statsqueryid="316859404" data-links="arrendamiento urbano desahucio" data-optimize="20260818" data-roj="AAP T 432/2026" data-fechares="20260709" data-alertdoc="" data-start="5" data-lang="1" data-langiso="es">AAP Tarragona, a 09 de julio de 2026 - ROJ: AAP T 432/2026</a>
+</div>
+<div class="metadatos">
+<ul>
+<li>
+<b>ECLI:ES:APT:2026:432A</b>
+</li>
+<li>N&ordm; de Resoluci&oacute;n: <b>211/2026</b>
+</li>
+<li>Municipio: <b>Tarragona</b>
+</li>
+<li>Ponente: <b>INMACULADA PERDIGONES SANCHEZ</b>
+</li>
+<li>N&ordm; Recurso: <b>776/2026</b>
+</li>
+</ul>
+</div>
+<div class="summary" id="jur-summary-5">
+                                   Resumen Autom&aacute;tico: <b>el legislador no ha hecho distinción alguna sobre la clase de acción ejercitada en la demanda, y ha establecido la obligatoriedad de cumplimiento de dicho requisito de la consignación de rentas para todos "los procesos que lleven aparejado el lanzamiento";de manera que este precepto hace exigible el cumplimiento oportuno del requisito en todos aquellos procesos, cualquiera que sea la acción ejercitada y el cauce procedimental seguido, cuya consecuencia sea el lanzamiento, o lo que es lo mismo, lleven aparejado el desalojo o la entrega de la posesión, como consecuencia del cese de una relación jurídica en la que se venga satisfaciendo un canon o renta, por lo que resulta irrelevante que el contrato sea de <font color=red>arrendamiento</font> común de cosa, o especial rústico o <font color=red>urbano</font>, o sea un <font color=red>arrendamiento</font> complejo o un contrato mixto ( ATS 16-12-09, 2295/06 y STS 30 noviembre</b>
+</div>
+</div>
+<div class="">
+<div class="info pull-right">
+<ul></ul>
+</div>
+</div>
+<div class="col-xs-12 actions">
+<div class="pull-left docactions">
+<ul>
+<li id="jur-leglink-5" class="hidden-xs hidden legislacion" data-toggle="popover" data-a="jur-legdiv-5" data-placement="bottom" data-pos="5">
+<a href="#" onclick="return false;" class="tooltips" title="Legislaci&oacute;n relacionada" data-placement="top">
+								Legislaci&oacute;n <i class="fa fa-angle-down" aria-hidden="true"></i></a>
+</li>
+</ul>
+<div id="jur-legdiv-5" class="showLegRel hidden popover-content"></div>
+</div>
+<div class="pull-right docactions">
+<ul>
+<li class="social tooltips" title="compartir en Facebook" data-placement="bottom">
+<a href="#" class="fb-button" aria-label="Icono compartir en Facebook" data-href="https://www.poderjudicial.es/search/AN/openDocument/0bbfcd68f16c78baa0a8778d75e36f0d/20260818" data-title="ROJ: AAP T 432/2026"><i class="fa fa-facebook-square" aria-hidden="true"></i></a>
+</li>
+<li class="social tooltips twitter" title="compartir en Twitter" data-placement="bottom">
+<a href="#" class="twtr-button" aria-label="Icono compartir en Twitter. Pulse para compartir en Twitter" data-href="https://www.poderjudicial.es/search/AN/openDocument/0bbfcd68f16c78baa0a8778d75e36f0d/20260818" data-title="ROJ: AAP T 432/2026">
+<svg class="social_twitter" viewBox="0 0 26 26" aria-hidden="true">
+<g>
+<path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path>
+</g>
+</svg>
+</a>
+</li>
+<li class="social tooltips" title="copiar enlace" data-placement="bottom">
+<a href="#" class="cp-button" aria-label="Icono copiar enlace al portapapeles" data-clipboard-text="https://www.poderjudicial.es/search/AN/openDocument/0bbfcd68f16c78baa0a8778d75e36f0d/20260818"><i class="fa fa-clipboard" aria-hidden="true"></i></a>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="row searchresult doc" id="jurisprudenciaresults_content-11815138" data-ref="11815138" data-db="AN" data-fechares="20260707" data-alertdoc="">
+<div class="col-xs-12 col-sm-12 content">
+<div class="title">
+<a href="#" data-link="https://www.poderjudicial.es/search/AN/openDocument/32fbbf7484b473dca0a8778d75e36f0d/20260805" onclick="markOpenedDoc($(this));openDocumentNewWindow(this);return false;" class="tooltips new-button hidden-xs" title="Abrir el documento en nueva ventana" data-placement="top" aria-label="Icono Abrir el documento en nueva ventana" data-databasematch="AN" data-reference="11815138" data-statsqueryid="316859404" data-links="arrendamiento urbano desahucio" data-optimize="20260805" data-start="6" data-lang="1"><i class="fa fa-external-link" aria-hidden="true"></i></a><span class="separator hidden-xs">&nbsp;</span><a href="https://www.poderjudicial.es/search/AN/openDocument/32fbbf7484b473dca0a8778d75e36f0d/20260805" id="ref-11815138" onclick="markOpenedDoc($(this));openDocumentFromHref(this);return false;" data-databasematch="AN" data-reference="11815138" data-statsqueryid="316859404" data-links="arrendamiento urbano desahucio" data-optimize="20260805" data-roj="SAP S 1209/2026" data-fechares="20260707" data-alertdoc="" data-start="6" data-lang="1" data-langiso="es">SAP Cantabria, a 07 de julio de 2026 - ROJ: SAP S 1209/2026</a>
+</div>
+<div class="metadatos">
+<ul>
+<li>
+<b>ECLI:ES:APS:2026:1209</b>
+</li>
+<li>N&ordm; de Resoluci&oacute;n: <b>443/2026</b>
+</li>
+<li>Municipio: <b>Santander</b>
+</li>
+<li>Ponente: <b>JUSTO MANUEL GARCIA BARROS</b>
+</li>
+<li>N&ordm; Recurso: <b>20/2026</b>
+</li>
+</ul>
+</div>
+<div class="summary" id="jur-summary-6">
+                                   Resumen Autom&aacute;tico: <b>cede, desmembrándolo del dominio, por lo que la delimitación del plazo es esencial en este negocio jurídico" ( sentencia de 21 de mayo de 1958). El plazo de vigencia del contrato de <font color=red>arrendamiento</font> se podrá fijar, como señaló esta sala en aquella sentencia, de acuerdo con la regla general del art. 1.125 CC, bien fijando un período cierto y determinado, bien refiriendo el término de la vigencia del contrato a un acontecimiento futuro, pero que necesariamente haya de suceder." En el contrato que nos ocupa el plazo se había establecido en las cláusulas tercera y cuarta de manera que cuando se cumplió el plazo de 5 años dicho contrato debía quedar extinguido. Ciertamente hay que estar también a lo dispuesto en la Ley de <font color=red>Arrendamientos</font> <font color=red>Urbanos</font>. En el artículo 9, en la redacción vigente en el momento en que se</b>
+</div>
+</div>
+<div class="">
+<div class="info pull-right">
+<ul></ul>
+</div>
+</div>
+<div class="col-xs-12 actions">
+<div class="pull-left docactions">
+<ul>
+<li id="jur-leglink-6" class="hidden-xs hidden legislacion" data-toggle="popover" data-a="jur-legdiv-6" data-placement="bottom" data-pos="6">
+<a href="#" onclick="return false;" class="tooltips" title="Legislaci&oacute;n relacionada" data-placement="top">
+								Legislaci&oacute;n <i class="fa fa-angle-down" aria-hidden="true"></i></a>
+</li>
+</ul>
+<div id="jur-legdiv-6" class="showLegRel hidden popover-content"></div>
+</div>
+<div class="pull-right docactions">
+<ul>
+<li class="social tooltips" title="compartir en Facebook" data-placement="bottom">
+<a href="#" class="fb-button" aria-label="Icono compartir en Facebook" data-href="https://www.poderjudicial.es/search/AN/openDocument/32fbbf7484b473dca0a8778d75e36f0d/20260805" data-title="ROJ: SAP S 1209/2026"><i class="fa fa-facebook-square" aria-hidden="true"></i></a>
+</li>
+<li class="social tooltips twitter" title="compartir en Twitter" data-placement="bottom">
+<a href="#" class="twtr-button" aria-label="Icono compartir en Twitter. Pulse para compartir en Twitter" data-href="https://www.poderjudicial.es/search/AN/openDocument/32fbbf7484b473dca0a8778d75e36f0d/20260805" data-title="ROJ: SAP S 1209/2026">
+<svg class="social_twitter" viewBox="0 0 26 26" aria-hidden="true">
+<g>
+<path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path>
+</g>
+</svg>
+</a>
+</li>
+<li class="social tooltips" title="copiar enlace" data-placement="bottom">
+<a href="#" class="cp-button" aria-label="Icono copiar enlace al portapapeles" data-clipboard-text="https://www.poderjudicial.es/search/AN/openDocument/32fbbf7484b473dca0a8778d75e36f0d/20260805"><i class="fa fa-clipboard" aria-hidden="true"></i></a>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="row searchresult doc" id="jurisprudenciaresults_content-11825522" data-ref="11825522" data-db="AN" data-fechares="20260707" data-alertdoc="">
+<div class="col-xs-12 col-sm-12 content">
+<div class="title">
+<a href="#" data-link="https://www.poderjudicial.es/search/AN/openDocument/295ec2e65a3c850aa0a8778d75e36f0d/20260820" onclick="markOpenedDoc($(this));openDocumentNewWindow(this);return false;" class="tooltips new-button hidden-xs" title="Abrir el documento en nueva ventana" data-placement="top" aria-label="Icono Abrir el documento en nueva ventana" data-databasematch="AN" data-reference="11825522" data-statsqueryid="316859404" data-links="arrendamiento urbano desahucio" data-optimize="20260820" data-start="7" data-lang="1"><i class="fa fa-external-link" aria-hidden="true"></i></a><span class="separator hidden-xs">&nbsp;</span><a href="https://www.poderjudicial.es/search/AN/openDocument/295ec2e65a3c850aa0a8778d75e36f0d/20260820" id="ref-11825522" onclick="markOpenedDoc($(this));openDocumentFromHref(this);return false;" data-databasematch="AN" data-reference="11825522" data-statsqueryid="316859404" data-links="arrendamiento urbano desahucio" data-optimize="20260820" data-roj="STIC 1062/2026" data-fechares="20260707" data-alertdoc="" data-start="7" data-lang="1" data-langiso="es">STIC Guip&uacute;zcoa, a 07 de julio de 2026 - ROJ: STIC 1062/2026</a>
+</div>
+<div class="metadatos">
+<ul>
+<li>
+<b>ECLI:ES:TIC:2026:1062</b>
+</li>
+<li>N&ordm; de Resoluci&oacute;n: <b>314/2026</b>
+</li>
+<li>Municipio: <b>Donostia-San Sebasti&aacute;n</b>
+</li>
+<li>Ponente: <b>PABLO AGUIRRE ALLENDE</b>
+</li>
+<li>N&ordm; Recurso: <b>21/2026</b>
+</li>
+</ul>
+</div>
+<div class="summary" id="jur-summary-7">
+                                   Resumen Autom&aacute;tico: <b>entrada no cabe sino advertir que la parte actora se ha limitado a pretender la recuperación de la posesión de la Finca, sin ejercitar simultáneamente reclamación dineraria alguna. Por consiguiente, y reconocido que, aun en el supuesto más favorable al Sr. , este último adeudaría la nada desdeñable suma de 3.200 euros (Hecho Tercero de la contestación), tan solo resta constatar el impago, y, por ende, la correlativa procedencia del <font color=red>desahucio</font> pretendido conforme al inciso a) del art. 27.2 de la Ley 29/1994, de 24 de noviembre, de <font color=red>Arrendamientos</font> <font color=red>Urbanos</font> (LAU"). Y digo esto último dejando al margen, claro está, por innecesario a fin de resolver sobre la única pretensión formulada, el tenor y alcance del Manifestando II in finedel Contrato; pacto contractual este último el cual constituyó el carácter no ya mancomunado sino, por el</b>
+</div>
+</div>
+<div class="">
+<div class="info pull-right">
+<ul></ul>
+</div>
+</div>
+<div class="col-xs-12 actions">
+<div class="pull-left docactions">
+<ul>
+<li id="jur-leglink-7" class="hidden-xs hidden legislacion" data-toggle="popover" data-a="jur-legdiv-7" data-placement="bottom" data-pos="7">
+<a href="#" onclick="return false;" class="tooltips" title="Legislaci&oacute;n relacionada" data-placement="top">
+								Legislaci&oacute;n <i class="fa fa-angle-down" aria-hidden="true"></i></a>
+</li>
+</ul>
+<div id="jur-legdiv-7" class="showLegRel hidden popover-content"></div>
+</div>
+<div class="pull-right docactions">
+<ul>
+<li class="social tooltips" title="compartir en Facebook" data-placement="bottom">
+<a href="#" class="fb-button" aria-label="Icono compartir en Facebook" data-href="https://www.poderjudicial.es/search/AN/openDocument/295ec2e65a3c850aa0a8778d75e36f0d/20260820" data-title="ROJ: STIC 1062/2026"><i class="fa fa-facebook-square" aria-hidden="true"></i></a>
+</li>
+<li class="social tooltips twitter" title="compartir en Twitter" data-placement="bottom">
+<a href="#" class="twtr-button" aria-label="Icono compartir en Twitter. Pulse para compartir en Twitter" data-href="https://www.poderjudicial.es/search/AN/openDocument/295ec2e65a3c850aa0a8778d75e36f0d/20260820" data-title="ROJ: STIC 1062/2026">
+<svg class="social_twitter" viewBox="0 0 26 26" aria-hidden="true">
+<g>
+<path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path>
+</g>
+</svg>
+</a>
+</li>
+<li class="social tooltips" title="copiar enlace" data-placement="bottom">
+<a href="#" class="cp-button" aria-label="Icono copiar enlace al portapapeles" data-clipboard-text="https://www.poderjudicial.es/search/AN/openDocument/295ec2e65a3c850aa0a8778d75e36f0d/20260820"><i class="fa fa-clipboard" aria-hidden="true"></i></a>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="row searchresult doc" id="jurisprudenciaresults_content-11819699" data-ref="11819699" data-db="AN" data-fechares="20260703" data-alertdoc="">
+<div class="col-xs-12 col-sm-12 content">
+<div class="title">
+<a href="#" data-link="https://www.poderjudicial.es/search/AN/openDocument/d6567639535edf51a0a8778d75e36f0d/20260812" onclick="markOpenedDoc($(this));openDocumentNewWindow(this);return false;" class="tooltips new-button hidden-xs" title="Abrir el documento en nueva ventana" data-placement="top" aria-label="Icono Abrir el documento en nueva ventana" data-databasematch="AN" data-reference="11819699" data-statsqueryid="316859404" data-links="arrendamiento urbano desahucio" data-optimize="20260812" data-start="8" data-lang="1"><i class="fa fa-external-link" aria-hidden="true"></i></a><span class="separator hidden-xs">&nbsp;</span><a href="https://www.poderjudicial.es/search/AN/openDocument/d6567639535edf51a0a8778d75e36f0d/20260812" id="ref-11819699" onclick="markOpenedDoc($(this));openDocumentFromHref(this);return false;" data-databasematch="AN" data-reference="11819699" data-statsqueryid="316859404" data-links="arrendamiento urbano desahucio" data-optimize="20260812" data-roj="STIC 875/2026" data-fechares="20260703" data-alertdoc="" data-start="8" data-lang="1" data-langiso="es">STIC Cantabria, a 03 de julio de 2026 - ROJ: STIC 875/2026</a>
+</div>
+<div class="metadatos">
+<ul>
+<li>
+<b>ECLI:ES:TIC:2026:875</b>
+</li>
+<li>N&ordm; de Resoluci&oacute;n: <b>258/2026</b>
+</li>
+<li>Municipio: <b>Santander</b>
+</li>
+<li>Ponente: <b>ANA ISABEL VIA&Ntilde;A RANILLA</b>
+</li>
+<li>N&ordm; Recurso: <b>932/2025</b>
+</li>
+</ul>
+</div>
+<div class="summary" id="jur-summary-8">
+                                   Resumen Autom&aacute;tico: <b>Santander, a 03 de julio del 2026. Vistos por el Ilmo./a D./Dña. ANA ISABEL VIAÑA RANILLA, Magistrado-Juez de la Sección Civil del Tribunal de Instancia de Santander. Plaza nº 10 los presentes autos de Juicio verbal (<font color=red>Desahucio</font> Falta pago - 250.1.1) nº 0000932/2025 seguidos a instancia de la COMUNIDAD DE BIENES representada por el Procurador D./Dña. Carmen Martínez García y asistida por el Letrado D./Dña. MIGUEL GONZALEZ RUBARENA contra representado por el Procurador Alfredo José Vara del Cerro y defendido por el Letrado D./Dña. ROSANA HAYA GARCIA sobre <font color=red>Arrendamientos</font> <font color=red>Urbanos</font>. . PRIMERO.-La Procuradora CARMEN MARTÍNEZ GARCÍA, en nombre y representación de la COMUNIDAD DE BIENES , interpuso demanda contra , por falta de pago y reclamación de rentas , interesando que se declare resuelto el contrato de <font color=red>arrendamiento</font></b>
+</div>
+</div>
+<div class="">
+<div class="info pull-right">
+<ul></ul>
+</div>
+</div>
+<div class="col-xs-12 actions">
+<div class="pull-left docactions">
+<ul>
+<li id="jur-leglink-8" class="hidden-xs hidden legislacion" data-toggle="popover" data-a="jur-legdiv-8" data-placement="bottom" data-pos="8">
+<a href="#" onclick="return false;" class="tooltips" title="Legislaci&oacute;n relacionada" data-placement="top">
+								Legislaci&oacute;n <i class="fa fa-angle-down" aria-hidden="true"></i></a>
+</li>
+</ul>
+<div id="jur-legdiv-8" class="showLegRel hidden popover-content"></div>
+</div>
+<div class="pull-right docactions">
+<ul>
+<li class="social tooltips" title="compartir en Facebook" data-placement="bottom">
+<a href="#" class="fb-button" aria-label="Icono compartir en Facebook" data-href="https://www.poderjudicial.es/search/AN/openDocument/d6567639535edf51a0a8778d75e36f0d/20260812" data-title="ROJ: STIC 875/2026"><i class="fa fa-facebook-square" aria-hidden="true"></i></a>
+</li>
+<li class="social tooltips twitter" title="compartir en Twitter" data-placement="bottom">
+<a href="#" class="twtr-button" aria-label="Icono compartir en Twitter. Pulse para compartir en Twitter" data-href="https://www.poderjudicial.es/search/AN/openDocument/d6567639535edf51a0a8778d75e36f0d/20260812" data-title="ROJ: STIC 875/2026">
+<svg class="social_twitter" viewBox="0 0 26 26" aria-hidden="true">
+<g>
+<path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path>
+</g>
+</svg>
+</a>
+</li>
+<li class="social tooltips" title="copiar enlace" data-placement="bottom">
+<a href="#" class="cp-button" aria-label="Icono copiar enlace al portapapeles" data-clipboard-text="https://www.poderjudicial.es/search/AN/openDocument/d6567639535edf51a0a8778d75e36f0d/20260812"><i class="fa fa-clipboard" aria-hidden="true"></i></a>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="row searchresult doc" id="jurisprudenciaresults_content-11822253" data-ref="11822253" data-db="AN" data-fechares="20260703" data-alertdoc="">
+<div class="col-xs-12 col-sm-12 content">
+<div class="title">
+<a href="#" data-link="https://www.poderjudicial.es/search/AN/openDocument/3208e03b94f61d86a0a8778d75e36f0d/20260817" onclick="markOpenedDoc($(this));openDocumentNewWindow(this);return false;" class="tooltips new-button hidden-xs" title="Abrir el documento en nueva ventana" data-placement="top" aria-label="Icono Abrir el documento en nueva ventana" data-databasematch="AN" data-reference="11822253" data-statsqueryid="316859404" data-links="arrendamiento urbano desahucio" data-optimize="20260817" data-start="9" data-lang="1"><i class="fa fa-external-link" aria-hidden="true"></i></a><span class="separator hidden-xs">&nbsp;</span><a href="https://www.poderjudicial.es/search/AN/openDocument/3208e03b94f61d86a0a8778d75e36f0d/20260817" id="ref-11822253" onclick="markOpenedDoc($(this));openDocumentFromHref(this);return false;" data-databasematch="AN" data-reference="11822253" data-statsqueryid="316859404" data-links="arrendamiento urbano desahucio" data-optimize="20260817" data-roj="SAP B 5215/2026" data-fechares="20260703" data-alertdoc="" data-start="9" data-lang="1" data-langiso="es">SAP Barcelona, a 03 de julio de 2026 - ROJ: SAP B 5215/2026</a>
+</div>
+<div class="metadatos">
+<ul>
+<li>
+<b>ECLI:ES:APB:2026:5215</b>
+</li>
+<li>N&ordm; de Resoluci&oacute;n: <b>437/2026</b>
+</li>
+<li>Municipio: <b>Barcelona</b>
+</li>
+<li>Ponente: <b>ESTER VIDAL FONTCUBERTA</b>
+</li>
+<li>N&ordm; Recurso: <b>1977/2025</b>
+</li>
+</ul>
+</div>
+<div class="summary" id="jur-summary-9">
+                                   Resumen Autom&aacute;tico: <b>de <font color=red>Arrendamientos</font> <font color=red>Urbanos</font>, que pretendan recuperar la posesión de la finca, se haya suspendido o no previamente el proceso en los términos establecidos en el apartado 5 del artículo 441 de la Ley 1/2000, de 7 de enero,de Enjuiciamiento Civil , la persona arrendataria podrá instar, de conformidad con lo previsto en este artículo, un incidente de suspensión extraordinaria del <font color=red>desahucio</font> o lanzamiento ante el Juzgado por encontrarse en una situación de vulnerabilidad económica que le imposibilite encontrar una alternativa habitacional para sí y para las personas con las que conviva." Como puede verse esta suspensión sólo estaba prevista para los procedimientos de <font color=red>desahucio</font> por falta de pago o por expiración del plazo, pero no para los procedimientos de <font color=red>desahucio</font> por precario, como es el presente. Para estos últimos la norma solamente</b>
+</div>
+</div>
+<div class="">
+<div class="info pull-right">
+<ul></ul>
+</div>
+</div>
+<div class="col-xs-12 actions">
+<div class="pull-left docactions">
+<ul>
+<li id="jur-leglink-9" class="hidden-xs hidden legislacion" data-toggle="popover" data-a="jur-legdiv-9" data-placement="bottom" data-pos="9">
+<a href="#" onclick="return false;" class="tooltips" title="Legislaci&oacute;n relacionada" data-placement="top">
+								Legislaci&oacute;n <i class="fa fa-angle-down" aria-hidden="true"></i></a>
+</li>
+</ul>
+<div id="jur-legdiv-9" class="showLegRel hidden popover-content"></div>
+</div>
+<div class="pull-right docactions">
+<ul>
+<li class="social tooltips" title="compartir en Facebook" data-placement="bottom">
+<a href="#" class="fb-button" aria-label="Icono compartir en Facebook" data-href="https://www.poderjudicial.es/search/AN/openDocument/3208e03b94f61d86a0a8778d75e36f0d/20260817" data-title="ROJ: SAP B 5215/2026"><i class="fa fa-facebook-square" aria-hidden="true"></i></a>
+</li>
+<li class="social tooltips twitter" title="compartir en Twitter" data-placement="bottom">
+<a href="#" class="twtr-button" aria-label="Icono compartir en Twitter. Pulse para compartir en Twitter" data-href="https://www.poderjudicial.es/search/AN/openDocument/3208e03b94f61d86a0a8778d75e36f0d/20260817" data-title="ROJ: SAP B 5215/2026">
+<svg class="social_twitter" viewBox="0 0 26 26" aria-hidden="true">
+<g>
+<path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path>
+</g>
+</svg>
+</a>
+</li>
+<li class="social tooltips" title="copiar enlace" data-placement="bottom">
+<a href="#" class="cp-button" aria-label="Icono copiar enlace al portapapeles" data-clipboard-text="https://www.poderjudicial.es/search/AN/openDocument/3208e03b94f61d86a0a8778d75e36f0d/20260817"><i class="fa fa-clipboard" aria-hidden="true"></i></a>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="row searchresult doc" id="jurisprudenciaresults_content-11798613" data-ref="11798613" data-db="AN" data-fechares="20260702" data-alertdoc="">
+<div class="col-xs-12 col-sm-12 content">
+<div class="title">
+<a href="#" data-link="https://www.poderjudicial.es/search/AN/openDocument/0b9cdd6931867e18a0a8778d75e36f0d/20260720" onclick="markOpenedDoc($(this));openDocumentNewWindow(this);return false;" class="tooltips new-button hidden-xs" title="Abrir el documento en nueva ventana" data-placement="top" aria-label="Icono Abrir el documento en nueva ventana" data-databasematch="AN" data-reference="11798613" data-statsqueryid="316859404" data-links="arrendamiento urbano desahucio" data-optimize="20260720" data-start="10" data-lang="1"><i class="fa fa-external-link" aria-hidden="true"></i></a><span class="separator hidden-xs">&nbsp;</span><a href="https://www.poderjudicial.es/search/AN/openDocument/0b9cdd6931867e18a0a8778d75e36f0d/20260720" id="ref-11798613" onclick="markOpenedDoc($(this));openDocumentFromHref(this);return false;" data-databasematch="AN" data-reference="11798613" data-statsqueryid="316859404" data-links="arrendamiento urbano desahucio" data-optimize="20260720" data-roj="SAP NA 1206/2026" data-fechares="20260702" data-alertdoc="" data-start="10" data-lang="1" data-langiso="es">SAP Navarra, a 02 de julio de 2026 - ROJ: SAP NA 1206/2026</a>
+</div>
+<div class="metadatos">
+<ul>
+<li>
+<b>ECLI:ES:APNA:2026:1206</b>
+</li>
+<li>N&ordm; de Resoluci&oacute;n: <b>913/2026</b>
+</li>
+<li>Municipio: <b>Pamplona/Iru&ntilde;a</b>
+</li>
+<li>Ponente: <b>AURELIO HERMINIO VILA DUPLA</b>
+</li>
+<li>N&ordm; Recurso: <b>623/2026</b>
+</li>
+</ul>
+</div>
+<div class="summary" id="jur-summary-10">
+									RESUMEN: <b><font color=red>Arrendamientos</font> <font color=red>urbanos</font>. Vivienda. Denegación de prórroga del contrato por necesidad del arrendador. MASC como requisito de procedibilidad imperativo. Efectos de su ausencia.</b>
+</div>
+</div>
+<div class="">
+<div class="info pull-right">
+<ul></ul>
+</div>
+</div>
+<div class="col-xs-12 actions">
+<div class="pull-left docactions">
+<ul>
+<li id="jur-leglink-10" class="hidden-xs hidden legislacion" data-toggle="popover" data-a="jur-legdiv-10" data-placement="bottom" data-pos="10">
+<a href="#" onclick="return false;" class="tooltips" title="Legislaci&oacute;n relacionada" data-placement="top">
+								Legislaci&oacute;n <i class="fa fa-angle-down" aria-hidden="true"></i></a>
+</li>
+</ul>
+<div id="jur-legdiv-10" class="showLegRel hidden popover-content"></div>
+</div>
+<div class="pull-right docactions">
+<ul>
+<li class="social tooltips" title="compartir en Facebook" data-placement="bottom">
+<a href="#" class="fb-button" aria-label="Icono compartir en Facebook" data-href="https://www.poderjudicial.es/search/AN/openDocument/0b9cdd6931867e18a0a8778d75e36f0d/20260720" data-title="ROJ: SAP NA 1206/2026"><i class="fa fa-facebook-square" aria-hidden="true"></i></a>
+</li>
+<li class="social tooltips twitter" title="compartir en Twitter" data-placement="bottom">
+<a href="#" class="twtr-button" aria-label="Icono compartir en Twitter. Pulse para compartir en Twitter" data-href="https://www.poderjudicial.es/search/AN/openDocument/0b9cdd6931867e18a0a8778d75e36f0d/20260720" data-title="ROJ: SAP NA 1206/2026">
+<svg class="social_twitter" viewBox="0 0 26 26" aria-hidden="true">
+<g>
+<path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path>
+</g>
+</svg>
+</a>
+</li>
+<li class="social tooltips" title="copiar enlace" data-placement="bottom">
+<a href="#" class="cp-button" aria-label="Icono copiar enlace al portapapeles" data-clipboard-text="https://www.poderjudicial.es/search/AN/openDocument/0b9cdd6931867e18a0a8778d75e36f0d/20260720"><i class="fa fa-clipboard" aria-hidden="true"></i></a>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="bottompagination row">
+<form id="bottomfrmFilterjurisprudencia" name="frmFilterjurisprudencia" action="#" class="searchform" onsubmit="goToPage('jurisprudencia',$(this).find('.slectnavgoto input').val());">
+<div id="jurisprudenciaresults_bottompagination" class="pull-right searchpagination searchform bottom"></div>
+</form>
+</div>
+</div>
