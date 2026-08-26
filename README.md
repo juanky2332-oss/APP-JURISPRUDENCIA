@@ -16,9 +16,14 @@ otra fuente. Si CENDOJ no lo devuelve, la aplicación no lo enseña.
   nº de resolución, legislación citada e idioma — todos ellos filtros reales del formulario del CGPJ.
 - **Detecta identificadores**: si pegas un ECLI (`ECLI:ES:TS:2014:3877`) o un ROJ (`STS 1234/2020`) en
   la caja de búsqueda, consulta por identificador exacto en vez de por texto.
-- **Verifica**: cualquier resultado puede comprobarse contra CENDOJ por su ECLI, y la interfaz distingue
-  visualmente tres estados: *localizado*, *verificado* y *no verificado*.
-- **Muestra el documento oficial**: sirve el PDF publicado por el CGPJ tal cual, sin modificarlo.
+- **Verifica**: cualquier resultado puede comprobarse contra CENDOJ por su ECLI. La interfaz distingue
+  *localizado*, *verificado* y *no confirmado*, y **escribe la frase de lo que contestó CENDOJ** —qué se
+  preguntó, qué resolución devolvió y a qué hora—, para que el sello no sea una etiqueta sin respaldo.
+- **Abre el documento oficial** en poderjudicial.es con la sesión del propio usuario. El CGPJ protege sus
+  PDF con un CAPTCHA antidescargas masivas que salta siempre que la petición sale de un servidor; esta
+  aplicación **no lo esquiva**: lo detecta y lleva al usuario al documento por la vía oficial.
+- **Se recorre con las flechas**: ← y → saltan a la resolución anterior y siguiente de la lista de
+  resultados (y paginan en el buscador); `Esc` vuelve a los resultados.
 - **Extrae fragmentos literales** del PDF: subcadenas exactas que contienen tus términos, con su número
   de página. Nunca un resumen.
 - **Genera citas** a partir de los campos que CENDOJ ha devuelto, omitiendo los que faltan.
@@ -97,7 +102,10 @@ Ejecútala cuando la app empiece a devolver fichas vacías: te dirá exactamente
    la insignia verde **Verificado**.
 5. **Verificación negativa**: pega `ECLI:ES:TS:1999:999999`. La aplicación dice que CENDOJ no lo
    confirma, en rojo, y no muestra nada más.
-6. **Documento oficial**: en cualquier resultado, *Abrir PDF oficial*. Se sirve el PDF del CGPJ.
+6. **Documento oficial**: en cualquier resultado, *Ver en poderjudicial.es (PDF oficial)*. Se abre una
+   pestaña que pasa por el buscador del CGPJ —para obtener sesión— y salta al PDF. Si el CGPJ muestra su
+   CAPTCHA de descargas masivas, escríbelo: es de un solo uso.
+6bis. **Navegación**: dentro de una ficha, ← y → recorren la lista de resultados y `Esc` vuelve atrás.
 7. **Fragmentos literales**: entra en *Ver ficha completa* y pulsa *Buscar fragmentos en el documento*.
    Salen las apariciones exactas de tus términos con su página. Si no aparecen, lo dice — no inventa.
 8. **Estado del sistema**: <http://localhost:3000/api/salud>.
@@ -112,9 +120,9 @@ Todos los endpoints son `GET` y devuelven JSON (salvo `/api/documento`, que devu
 | --- | --- |
 | `/api/buscar` | Búsqueda. Parámetros: `q`, `jurisdiccion`, `tipoOrgano`, `tipoResolucion` (repetible), `fechaDesde`, `fechaHasta` (AAAA-MM-DD), `ponente`, `numeroRecurso`, `numeroResolucion`, `norma`, `idioma`, `ecli`, `roj`, `orden`, `pagina`, `porPagina`. |
 | `/api/verificar` | `?id=<ECLI o ROJ>`. Comprueba contra CENDOJ y devuelve `verificado` o `no_verificable`. |
-| `/api/documento` | `?id=<hex>&fecha=<AAAAMMDD>`. Sirve el PDF oficial. |
+| `/api/documento` | `?id=<hex>&fecha=<AAAAMMDD>`. Sirve el PDF oficial. Si el CGPJ interpone su CAPTCHA, responde `409 FUENTE_REQUIERE_CAPTCHA` con `urlOficial` (o redirige a `/documento` si quien pide es un navegador). |
 | `/api/texto` | `?id=&fecha=&q=`. Fragmentos literales del PDF + metadatos internos del documento. |
-| `/api/salud` | Estado de la integración con la fuente oficial. |
+| `/api/salud` | Estado de la integración: `operativo`, `degradado`, `limitado` (el CGPJ nos está aplicando su CAPTCHA) o `caido`. |
 
 Todas las respuestas de error tienen la misma forma:
 

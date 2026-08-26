@@ -2,18 +2,20 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import type { EstadoVerificacion, Resolucion, RespuestaError } from '@/lib/tipos';
+import type { EstadoVerificacion, Resolucion, RespuestaVerificacion } from '@/lib/tipos';
 import { InsigniaVerificacion } from './InsigniaVerificacion';
 import { Resaltado } from './Resaltado';
-import { citaConFuente } from '@/lib/cita';
-import { fechaLarga } from '@/lib/cita';
+import { BotonOficial } from './BotonOficial';
+import { BuscarEnCendoj } from './BuscarEnCendoj';
+import { IconoCopiar, IconoDocumento, IconoLibro, IconoSello, IconoAviso } from './Iconos';
+import { citaConFuente, fechaLarga } from '@/lib/cita';
 
-/** Muestra "no consta" en vez de inventar el dato ausente. */
+/** Muestra "no disponible" en vez de inventar el dato ausente. */
 function Dato({ etiqueta, valor }: { etiqueta: string; valor: string | null }) {
   return (
     <div className="metadato">
       <dt>{etiqueta}:</dt>
-      <dd>{valor ?? <span className="no-disponible">dato no disponible</span>}</dd>
+      <dd>{valor ?? <span className="no-disponible">no disponible</span>}</dd>
     </div>
   );
 }
@@ -29,22 +31,30 @@ export function TarjetaResultado({
 }) {
   const [copiado, setCopiado] = useState(false);
   const [estado, setEstado] = useState<EstadoVerificacion>(resolucion.estadoVerificacion);
+  const [explicacion, setExplicacion] = useState<string | null>(null);
   const [verificando, setVerificando] = useState(false);
   const [errorVerificacion, setErrorVerificacion] = useState<string | null>(null);
 
   /**
-   * Verificación bajo demanda: vuelve a preguntar a CENDOJ por el ECLI exacto.
-   * Solo así un resultado pasa de «localizado» a «verificado».
+   * Verificación bajo demanda: vuelve a preguntar a CENDOJ por el identificador
+   * exacto. Solo así un resultado pasa de «localizado» a «verificado» — y ahora
+   * la tarjeta enseña además la frase de qué contestó la fuente, para que el
+   * sello no sea una etiqueta sin respaldo.
    */
   async function verificar() {
-    if (!resolucion.ecli) return;
+    const identificador = resolucion.ecli ?? resolucion.roj;
+    if (!identificador) return;
     setVerificando(true);
     setErrorVerificacion(null);
     try {
-      const res = await fetch(`/api/verificar?id=${encodeURIComponent(resolucion.ecli)}`);
-      const cuerpo = (await res.json()) as { ok: true; estado: EstadoVerificacion } | RespuestaError;
-      if (cuerpo.ok) setEstado(cuerpo.estado);
-      else setErrorVerificacion(cuerpo.mensaje);
+      const res = await fetch(`/api/verificar?id=${encodeURIComponent(identificador)}`);
+      const cuerpo = (await res.json()) as RespuestaVerificacion;
+      if (cuerpo.ok) {
+        setEstado(cuerpo.estado);
+        setExplicacion(cuerpo.explicacion);
+      } else {
+        setErrorVerificacion(cuerpo.mensaje);
+      }
     } catch (e) {
       setErrorVerificacion((e as Error).message);
     } finally {
@@ -52,16 +62,17 @@ export function TarjetaResultado({
     }
   }
 
+  const { id, fecha } = (() => {
+    const bruto = resolucion.urlDocumentoProxy ?? '';
+    const u = new URLSearchParams(bruto.split('?')[1] ?? '');
+    return { id: u.get('id') ?? '', fecha: u.get('fecha') ?? '' };
+  })();
+
   const enlaceDetalle = (() => {
     const p = new URLSearchParams();
     if (resolucion.ecli) p.set('ecli', resolucion.ecli);
-    if (resolucion.urlDocumentoProxy) {
-      const u = new URLSearchParams(resolucion.urlDocumentoProxy.split('?')[1] ?? '');
-      const id = u.get('id');
-      const fecha = u.get('fecha');
-      if (id) p.set('id', id);
-      if (fecha) p.set('fecha', fecha);
-    }
+    if (id) p.set('id', id);
+    if (fecha) p.set('fecha', fecha);
     if (consulta) p.set('q', consulta);
     return `/resolucion?${p.toString()}`;
   })();
@@ -77,6 +88,8 @@ export function TarjetaResultado({
   }
 
   const extracto = resolucion.resumen.texto;
+  /** Identificador con el que se puede repreguntar a CENDOJ: ECLI si lo hay, si no ROJ. */
+  const identificador = resolucion.ecli ?? resolucion.roj;
 
   return (
     <li className="panel resultado">
@@ -123,7 +136,7 @@ export function TarjetaResultado({
           <span className="etiqueta-extracto">
             {resolucion.resumen.tipo === 'oficial'
               ? 'Resumen publicado por CENDOJ'
-              : 'Extracto automático de CENDOJ (recorte de texto, no una síntesis)'}
+              : 'Extracto automático de CENDOJ (recorte literal, no una síntesis)'}
           </span>
           <Resaltado texto={extracto} terminos={terminos} />
         </p>
@@ -133,31 +146,45 @@ export function TarjetaResultado({
         </p>
       )}
 
+      {explicacion ? (
+        <p className={`explicacion-verificacion${estado === 'no_verificable' ? ' negativa' : ''}`}>
+          {estado === 'no_verificable' ? <IconoAviso tamano={16} /> : <IconoSello tamano={16} />}
+          <span>{explicacion}</span>
+        </p>
+      ) : null}
+
       <div className="acciones-resultado">
         <Link className="btn-texto" href={enlaceDetalle}>
+          <IconoLibro tamano={15} />
           Ver ficha completa
         </Link>
-        {resolucion.urlDocumentoProxy ? (
-          <a className="btn-texto" href={resolucion.urlDocumentoProxy} target="_blank" rel="noreferrer">
-            Abrir PDF oficial
-          </a>
+
+        {resolucion.urlDocumentoOficial ? (
+          <BotonOficial destino={resolucion.urlDocumentoOficial}>
+            <IconoDocumento tamano={15} />
+            Ver en poderjudicial.es (PDF oficial)
+          </BotonOficial>
         ) : null}
-        <a className="btn-texto" href={resolucion.urlBuscadorOficial} target="_blank" rel="noreferrer">
-          Ver en poderjudicial.es
-        </a>
+
+        {identificador ? <BuscarEnCendoj identificador={identificador} /> : null}
+
         <button type="button" onClick={copiarCita}>
+          <IconoCopiar tamano={15} />
           {copiado ? 'Cita copiada' : 'Copiar cita'}
         </button>
-        {resolucion.ecli && estado !== 'verificado' ? (
+
+        {identificador && estado !== 'verificado' ? (
           <button type="button" onClick={verificar} disabled={verificando}>
-            {verificando ? 'Verificando en CENDOJ…' : 'Verificar por ECLI'}
+            <IconoSello tamano={15} />
+            {verificando ? 'Preguntando a CENDOJ…' : `Verificar por ${resolucion.ecli ? 'ECLI' : 'ROJ'}`}
           </button>
         ) : null}
       </div>
 
       {errorVerificacion ? (
-        <div className="aviso aviso-error" style={{ marginTop: 10, marginBottom: 0 }}>
-          No se ha podido verificar: {errorVerificacion}
+        <div className="aviso aviso-error" style={{ marginBottom: 0 }}>
+          <IconoAviso tamano={16} />
+          <span>No se ha podido verificar: {errorVerificacion}</span>
         </div>
       ) : null}
 
@@ -171,7 +198,10 @@ export function TarjetaResultado({
           <li>Base de datos CENDOJ de origen: {resolucion.baseDatos ?? 'no indicada'}</li>
           {resolucion.urlDocumentoOficial ? (
             <li>
-              URL oficial del documento: <code>{resolucion.urlDocumentoOficial}</code>
+              URL oficial del documento:{' '}
+              <BotonOficial destino={resolucion.urlDocumentoOficial} variante="enlace">
+                {resolucion.urlDocumentoOficial}
+              </BotonOficial>
             </li>
           ) : null}
         </ul>

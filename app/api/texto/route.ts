@@ -39,9 +39,23 @@ export async function GET(req: Request): Promise<NextResponse<RespuestaTexto>> {
     return error('PARAMETROS_INVALIDOS', 'Identificador de documento no válido.');
   }
 
+  const urlOficial = urlDocumentoOficial(id, fecha);
+
   try {
-    const { datos } = await obtenerBinario(urlDocumentoOficial(id, fecha));
-    const { paginas, caracteres, metadatos } = await analizarPdf(datos);
+    const documento = await obtenerBinario(urlOficial);
+
+    if (!documento.ok) {
+      // El texto sale del PDF oficial. Si el CGPJ no lo entrega, la app no
+      // rellena el hueco con nada: lo dice y ofrece la vía oficial.
+      const codigo = documento.motivo === 'captcha' ? 'FUENTE_REQUIERE_CAPTCHA' : 'FUENTE_ERROR_TRANSITORIO';
+      const mensaje =
+        documento.motivo === 'captcha'
+          ? 'No se pueden extraer fragmentos: el CGPJ protege este PDF con su control de descargas masivas. Ábrelo en poderjudicial.es y léelo allí.'
+          : 'CENDOJ no ha entregado el PDF oficial en este momento, así que no hay texto que analizar.';
+      return error(codigo, mensaje, documento.detalle, undefined, urlOficial) as NextResponse<RespuestaTexto>;
+    }
+
+    const { paginas, caracteres, metadatos } = await analizarPdf(documento.datos);
     const fragmentos = fragmentosRelevantes(paginas, consulta.terminos);
 
     return NextResponse.json<RespuestaTexto>(

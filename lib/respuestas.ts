@@ -11,6 +11,8 @@ const ESTADOS: Record<RespuestaError['codigo'], number> = {
   FUNCION_DESACTIVADA: 503,
   FUENTE_NO_DISPONIBLE: 502,
   FUENTE_ERROR_TRANSITORIO: 503,
+  // 409: la petición es correcta, pero el CGPJ exige una acción humana (CAPTCHA).
+  FUENTE_REQUIERE_CAPTCHA: 409,
   ERROR_INTERNO: 500,
 };
 
@@ -19,9 +21,10 @@ export function error(
   mensaje: string,
   detalle?: string,
   cabeceras?: HeadersInit,
+  urlOficial?: string,
 ): NextResponse<RespuestaError> {
   return NextResponse.json<RespuestaError>(
-    { ok: false, codigo, mensaje, ...(detalle ? { detalle } : {}) },
+    { ok: false, codigo, mensaje, ...(detalle ? { detalle } : {}), ...(urlOficial ? { urlOficial } : {}) },
     { status: ESTADOS[codigo], headers: cabeceras },
   );
 }
@@ -29,8 +32,8 @@ export function error(
 /** Traduce cualquier excepción a una respuesta de error legible. */
 export function desdeExcepcion(e: unknown, contexto: string): NextResponse<RespuestaError> {
   if (e instanceof ErrorFuente) {
-    log.warn(`${contexto}: fuente oficial no disponible`, { detalle: e.detalle ?? e.message });
-    return error(e.codigo, e.message, e.detalle);
+    log.warn(`${contexto}: fuente oficial no disponible`, { codigo: e.codigo, detalle: e.detalle ?? e.message });
+    return error(e.codigo, e.message, e.detalle, undefined, e.urlOficial);
   }
   const detalle = e instanceof Error ? e.message : String(e);
   log.error(`${contexto}: error interno`, { detalle });

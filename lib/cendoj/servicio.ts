@@ -19,6 +19,7 @@ import {
   urlBuscadorPorEcli,
   MAX_DOCUMENTOS_RECUPERABLES,
 } from './parametros';
+import { fechaLarga } from '../cita';
 
 /**
  * Capa de servicio: orquesta consulta → parseo → verificación → presentación.
@@ -79,7 +80,7 @@ export async function buscar(entrada: ParametrosBusqueda): Promise<ResultadoBusq
     start: paramsCendoj.start ?? '1',
   });
 
-  const { html } = await obtenerHtml(url);
+  const { html } = await obtenerHtml(url, urlBuscadorOficial(paramsCendoj));
   const { totalDeclarado, resoluciones } = parsearResultados(html);
 
   if (!flags.extraccionMetadatos) {
@@ -165,6 +166,9 @@ export type ResultadoVerificacion = {
   coincidencias: number;
   resolucion: Resolucion | null;
   urlBuscadorOficial: string;
+  comprobadoEn: string;
+  /** Qué se preguntó y qué contestó CENDOJ, en una frase. */
+  explicacion: string;
 };
 
 /**
@@ -181,15 +185,16 @@ export async function verificar(identificador: string): Promise<ResultadoVerific
     esEcliValido ? { ecli: valor, porPagina: 10 } : { roj: valor, porPagina: 10 },
   );
 
-  const { html } = await obtenerHtml(urlBusqueda(params));
+  const urlOficial = esEcliValido ? urlBuscadorPorEcli(valor) : urlBuscadorOficial(params);
+
+  const { html } = await obtenerHtml(urlBusqueda(params), urlOficial);
   const { resoluciones } = parsearResultados(html);
+  const comprobadoEn = new Date().toISOString();
 
   const coincidencia =
     resoluciones.find((r) =>
       esEcliValido ? r.ecli !== null && normalizarEcli(r.ecli) === valor : r.roj !== null && normalizarRoj(r.roj) === valor,
     ) ?? null;
-
-  const urlOficial = esEcliValido ? urlBuscadorPorEcli(valor) : urlBuscadorOficial(params);
 
   if (!coincidencia) {
     log.warn('Verificación negativa', { identificador: valor, devueltos: resoluciones.length });
@@ -200,23 +205,60 @@ export async function verificar(identificador: string): Promise<ResultadoVerific
       coincidencias: resoluciones.length,
       resolucion: null,
       urlBuscadorOficial: urlOficial,
+      comprobadoEn,
+      explicacion:
+        `Se ha preguntado a CENDOJ por el identificador ${valor} (${tipoIdentificador}) y la fuente oficial no ha devuelto ` +
+        `ninguna resolución con ese identificador${resoluciones.length > 0 ? ` (sí ha devuelto ${resoluciones.length} resolución(es) distintas)` : ''}. ` +
+        'No la cites.',
     };
   }
 
   const [conRanking] = reordenar([coincidencia], [], false);
+  const resolucion = conRanking ? { ...conRanking, estadoVerificacion: 'verificado' as const } : null;
+
   return {
     identificador: valor,
     tipoIdentificador,
     estado: 'verificado',
     coincidencias: resoluciones.length,
-    resolucion: conRanking ? { ...conRanking, estadoVerificacion: 'verificado' } : null,
+    resolucion,
     urlBuscadorOficial: urlOficial,
+    comprobadoEn,
+    explicacion: frasedeVerificacion(tipoIdentificador, valor, coincidencia),
   };
+}
+
+/**
+ * La frase que lee el usuario debajo del sello «Verificado». Se construye solo
+ * con datos que CENDOJ ha devuelto en esta misma comprobación: si un campo no
+ * viene, no aparece en la frase.
+ */
+function frasedeVerificacion(
+  tipo: 'ECLI' | 'ROJ',
+  valor: string,
+  r: { titulo: string; organo: string | null; salaSeccion: string | null; fechaResolucion: string | null },
+): string {
+  const quien = r.organo ?? r.salaSeccion;
+  const cuando = fechaLarga(r.fechaResolucion);
+  const detalles = [quien, cuando ? `de ${cuando}` : null].filter(Boolean).join(', ');
+  return (
+    `Se ha preguntado a CENDOJ por el identificador ${valor} (${tipo}) y la fuente oficial ha devuelto esa misma resolución` +
+    (detalles !== '' ? `: ${r.titulo} — ${detalles}.` : `: ${r.titulo}.`) +
+    ' Existe y el identificador es correcto.'
+  );
 }
 
 /** URL del PDF oficial reconstruida a partir de id + fecha. */
 export function urlDocumentoOficial(id: string, fecha: string): string {
   return `${config.cendoj.baseUrl}/AN/openDocument/${id}/${fecha}`;
+}
+
+/**
+ * URL del formulario oficial. Es la única que abre sin sesión previa, así que
+ * es el destino seguro cuando no hay identificador con el que buscar.
+ */
+export function urlFormularioOficial(): string {
+  return urlBuscadorOficial({ action: 'query', databasematch: 'AN' });
 }
 
 export { ErrorFuente };

@@ -45,7 +45,15 @@ export type Resolucion = {
   urlDocumentoOficial: Quiza<string>;
   /** URL interna del proxy que sirve ese mismo PDF con sesión válida. */
   urlDocumentoProxy: Quiza<string>;
-  /** Enlace al buscador oficial para reproducir la consulta a mano. */
+  /**
+   * Formulario oficial de CENDOJ (`indexAN.jsp`).
+   *
+   * CENDOJ **no publica URL compartibles de búsqueda**: `search.action` es un
+   * extremo AJAX que devuelve un fragmento XHTML, no una página, y en frío
+   * responde 403 o el CAPTCHA. El único enlace permanente que el propio CGPJ
+   * usa para una resolución es el del documento (`urlDocumentoOficial`), que es
+   * el que la interfaz ofrece como «verlo en poderjudicial.es».
+   */
   urlBuscadorOficial: string;
   estadoVerificacion: EstadoVerificacion;
   /** Puntuación del reordenado propio. Transparente: ver `explicacionRanking`. */
@@ -112,11 +120,15 @@ export type RespuestaError = {
     | 'PARAMETROS_INVALIDOS'
     | 'FUENTE_NO_DISPONIBLE'
     | 'FUENTE_ERROR_TRANSITORIO'
+    /** El CGPJ ha interpuesto su CAPTCHA antidescargas masivas. */
+    | 'FUENTE_REQUIERE_CAPTCHA'
     | 'LIMITE_PETICIONES'
     | 'FUNCION_DESACTIVADA'
     | 'ERROR_INTERNO';
   mensaje: string;
   detalle?: string;
+  /** Enlace oficial que el usuario puede abrir a mano cuando la vía automática se corta. */
+  urlOficial?: string;
 };
 
 export type RespuestaVerificacion =
@@ -128,6 +140,10 @@ export type RespuestaVerificacion =
       coincidencias: number;
       resolucion: Quiza<Resolucion>;
       urlBuscadorOficial: string;
+      /** Momento (ISO) en que se preguntó a CENDOJ. Lo muestra la interfaz. */
+      comprobadoEn: string;
+      /** Frase literal de lo que respondió CENDOJ, para que el estado se explique solo. */
+      explicacion: string;
     }
   | RespuestaError;
 

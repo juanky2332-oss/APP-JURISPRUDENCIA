@@ -66,13 +66,46 @@ avisa de que hay que acotar con filtros.
 metadatos internos del CGPJ (`Title` con ROJ y ECLI, `Author: CENDOJ`, `Subject` con el órgano). También
 exige sesión: sin ella devuelve el HTML del buscador con estado 200.
 
+**(g) El CGPJ tiene un control antidescargas masivas, y es el hecho que gobierna toda la arquitectura
+de la app.** Cuando la petición no le parece la de un navegador humano, CENDOJ no responde un 403:
+redirige a un CAPTCHA de imagen. Hay dos, con el mismo formulario `frmauthenticatecaptcha`:
+
+| Página | Cuándo salta | Rótulo |
+| --- | --- | --- |
+| `captcha.jsp?prevaction=accessToPDF` | al pedir un PDF | «Control · **Descargas masivas**» |
+| `captchalogin.jsp?prevaction=query` | al consultar `search.action` | «Control de **grandes paginaciones**» |
+
+Ambas conservan los parámetros de la petición original en campos ocultos y la reanudan cuando alguien
+escribe el código. El disparador es **la reputación de la IP**: desde una IP residencial el PDF llega a
+la primera; desde una IP de centro de datos —las de Vercel— el CAPTCHA salta **siempre** para el PDF,
+mientras la búsqueda sigue funcionando.
+
+Consecuencias, todas asumidas a propósito:
+
+1. **La app no resuelve ni esquiva el CAPTCHA.** Es una medida legítima del CGPJ y su aviso legal
+   prohíbe la descarga masiva. Saltárselo sería exactamente lo que la app promete no hacer.
+2. **El PDF lo abre el navegador del usuario**, no el servidor (`lib/enlaces.ts`): la pestaña pasa
+   primero por `indexAN.jsp`, que le da su propia `JSESSIONID`, y salta al documento. Es la navegación
+   que haría una persona, hecha por esa persona.
+3. **Detectar el CAPTCHA es obligatorio.** Su HTML no contiene `errorMessage` ni resultados, así que el
+   parser lo leería como «cero resoluciones» y la app le diría a un abogado que no existe jurisprudencia
+   que sí existe. `esControlDescargas()` lo evita y tiene tests propios.
+
+**(h) CENDOJ no publica URL compartibles de búsqueda.** `search.action` es un extremo AJAX: cuando
+responde bien devuelve un fragmento `<aside>` XHTML, no una página, y en frío contesta 403. `indexAN.jsp`
+con parámetros **no ejecuta la búsqueda**: repinta el formulario vacío. El único enlace permanente que el
+propio CGPJ usa para una resolución es el del documento (`data-link` en su HTML de resultados). Por eso
+«ver en poderjudicial.es» abre el PDF oficial, y repetir la búsqueda abre su formulario con el ECLI ya
+copiado al portapapeles, en vez de enviar al usuario a una URL que no le va a funcionar.
+
 ### 1.4 Clasificación honesta de cada técnica
 
 | Técnica | Categoría | Estado en el proyecto |
 | --- | --- | --- |
 | Consulta GET a `search.action` con sesión | **Automatización tolerable pero frágil** | Implementada. Es el núcleo. |
 | Parseo del HTML de resultados | **Automatización tolerable pero frágil** | Implementada, con tests sobre HTML real y flag para apagarla. |
-| Descarga del PDF oficial bajo demanda | **Tolerable** dentro del aviso legal (uso particular, sin masividad) | Implementada, con límite de peticiones. |
+| Descarga del PDF oficial bajo demanda | **Tolerable** dentro del aviso legal (uso particular, sin masividad) | Se intenta por proxy con límite de peticiones; si el CGPJ interpone su CAPTCHA, se deriva al navegador del usuario. |
+| Resolver el CAPTCHA antidescargas del CGPJ | **Prohibido**: es la medida con la que el CGPJ hace cumplir su aviso legal | **No implementado y no se implementará.** Se detecta y se declara. |
 | Extracción de texto del PDF | **Estable** (es un PDF de texto, no escaneado) | Implementada. |
 | Recorrido masivo del repertorio, índice propio | **Desaconsejado**: lo prohíbe el aviso legal del CGPJ | **No implementado y no se implementará.** |
 | Ranking equivalente al de un producto comercial | **No replicable con garantías**: su lógica no es pública | Se implementa un reordenado propio, explicable y declarado como tal. |
@@ -113,6 +146,10 @@ sabe de React. Si CENDOJ cambia su HTML, solo se toca la capa 2.
 - Reintentos con sesión nueva ante 403/401, 5xx o la página de error de CENDOJ.
 - `obtenerBinario` aplica la misma lógica al PDF y **exige `content-type: application/pdf`**: si llega
   HTML, es que la sesión no valía, y reintenta.
+- `esControlDescargas()` reconoce el CAPTCHA del CGPJ por la URL final (`captcha.jsp`, `captchalogin.jsp`)
+  o por su formulario. `obtenerHtml` lo convierte en `FUENTE_REQUIERE_CAPTCHA` en lugar de dejar que se
+  parsee como una página sin resultados; `obtenerBinario` **no lanza** en ese caso: devuelve el motivo,
+  porque desde un servidor es el desenlace normal y la interfaz tiene una salida para él.
 
 ### Capa 2 — Parseo y normalización
 

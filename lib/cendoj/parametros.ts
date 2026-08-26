@@ -117,11 +117,12 @@ export function urlBuscadorOficial(params: ParametrosCendoj): string {
   return `${config.cendoj.baseUrl}/indexAN.jsp?${qs}`;
 }
 
-/** Enlace oficial reproducible para una resolución concreta, por ECLI. */
+/** Enlace al formulario oficial de CENDOJ asociado a una resolución concreta. */
 export function urlBuscadorPorEcli(ecli: string): string {
   return urlBuscadorOficial({
     action: 'query',
     databasematch: 'AN',
+    sort: 'Relevance',
     start: '1',
     recordsPerPage: '10',
     ECLI: normalizarEcli(ecli),

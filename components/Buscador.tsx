@@ -3,7 +3,19 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { TarjetaResultado } from './TarjetaResultado';
+import { BotonOficial } from './BotonOficial';
+import {
+  IconoAviso,
+  IconoBalanza,
+  IconoColumna,
+  IconoFiltro,
+  IconoFlecha,
+  IconoLupa,
+  IconoMazo,
+  IconoSello,
+} from './Iconos';
 import { normalizarConsulta } from '@/lib/consulta';
+import { guardarContexto } from '@/lib/navegacion';
 import {
   IDIOMAS,
   JURISDICCIONES,
@@ -91,10 +103,24 @@ function aParametros(f: Formulario, pagina: number): URLSearchParams {
 
 function hayCriterios(f: Formulario): boolean {
   return (
-    [f.q, f.jurisdiccion, f.tipoOrgano, f.ponente, f.numeroRecurso, f.numeroResolucion, f.norma, f.fechaDesde, f.fechaHasta].some(
-      (v) => v.trim() !== '',
-    ) || f.tiposResolucion.length > 0
+    [
+      f.q,
+      f.jurisdiccion,
+      f.tipoOrgano,
+      f.ponente,
+      f.numeroRecurso,
+      f.numeroResolucion,
+      f.norma,
+      f.fechaDesde,
+      f.fechaHasta,
+    ].some((v) => v.trim() !== '') || f.tiposResolucion.length > 0
   );
+}
+
+/** Extrae id y fecha del enlace al proxy para poder reconstruir la ficha. */
+function partesDocumento(urlProxy: string | null): { id: string | null; fecha: string | null } {
+  const u = new URLSearchParams((urlProxy ?? '').split('?')[1] ?? '');
+  return { id: u.get('id'), fecha: u.get('fecha') };
 }
 
 export function Buscador() {
@@ -149,6 +175,18 @@ export function Buscador() {
           setDatos(null);
         } else {
           setDatos(cuerpo);
+
+          // Se guarda la lista para poder saltar entre fichas con las flechas.
+          guardarContexto({
+            q: f.q,
+            busqueda: parametros.toString(),
+            pagina: paginaSolicitada,
+            entradas: cuerpo.resultados.map((r) => {
+              const { id, fecha } = partesDocumento(r.urlDocumentoProxy);
+              return { titulo: r.titulo, ecli: r.ecli, id, fecha };
+            }),
+          });
+
           if (f.q.trim() !== '') {
             setHistorial((previo) => {
               const siguiente = [f.q.trim(), ...previo.filter((h) => h !== f.q.trim())].slice(0, 8);
@@ -214,31 +252,95 @@ export function Buscador() {
     void ejecutar(formulario, 1);
   }
 
-  function irAPagina(n: number) {
-    setPagina(n);
-    void ejecutar(formulario, n);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-
   const porPagina = datos?.porPagina ?? Number.parseInt(formulario.porPagina, 10);
   const tope = Math.min(datos?.totalDeclarado ?? 0, datos?.maxRecuperable ?? 200);
   const ultimaPagina = Math.max(1, Math.ceil(tope / porPagina));
 
+  const irAPagina = useCallback(
+    (n: number) => {
+      if (n < 1 || n > ultimaPagina) return;
+      setPagina(n);
+      void ejecutar(formulario, n);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    },
+    [ejecutar, formulario, ultimaPagina],
+  );
+
+  // Flechas del teclado para paginar, salvo mientras se escribe en un campo.
+  useEffect(() => {
+    function alPulsar(e: KeyboardEvent) {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      const activo = document.activeElement;
+      if (
+        activo instanceof HTMLInputElement ||
+        activo instanceof HTMLTextAreaElement ||
+        activo instanceof HTMLSelectElement
+      ) {
+        return;
+      }
+      if (!datos || datos.resultados.length === 0 || ultimaPagina <= 1) return;
+      if (e.key === 'ArrowLeft' && pagina > 1) {
+        e.preventDefault();
+        irAPagina(pagina - 1);
+      } else if (e.key === 'ArrowRight' && pagina < ultimaPagina) {
+        e.preventDefault();
+        irAPagina(pagina + 1);
+      }
+    }
+    window.addEventListener('keydown', alPulsar);
+    return () => window.removeEventListener('keydown', alPulsar);
+  }, [datos, pagina, ultimaPagina, irAPagina]);
+
+  const esCaptcha = fallo?.codigo === 'FUENTE_REQUIERE_CAPTCHA';
+
   return (
     <>
+      {!buscado && !datos ? (
+        <section className="portada">
+          <span className="portada-emblema">
+            <IconoBalanza tamano={30} />
+          </span>
+          <h1>Jurisprudencia española, solo desde la fuente oficial</h1>
+          <p>
+            Cada consulta se lanza en directo contra el buscador del CENDOJ (Consejo General del Poder Judicial). Se
+            muestran únicamente resoluciones que la fuente oficial devuelve, con su ECLI, su ROJ y el enlace al
+            documento del CGPJ. Nada se resume, nada se reescribe, nada se inventa.
+          </p>
+          <div className="portada-sellos">
+            <span className="portada-sello">
+              <IconoColumna tamano={15} />
+              Fuente única: CENDOJ
+            </span>
+            <span className="portada-sello">
+              <IconoSello tamano={15} />
+              Verificación por ECLI
+            </span>
+            <span className="portada-sello">
+              <IconoMazo tamano={15} />
+              Sin base de datos propia
+            </span>
+          </div>
+        </section>
+      ) : null}
+
       <form className="panel buscador" onSubmit={enviar}>
         <div className="caja-principal">
-          <input
-            type="search"
-            aria-label="Términos de búsqueda, ECLI o ROJ"
-            placeholder='Términos, ECLI (ECLI:ES:TS:2014:3877) o ROJ (STS 1234/2020). Operadores: Y, O, NO y "frase exacta"'
-            value={formulario.q}
-            onChange={(e) => actualizar('q', e.target.value)}
-          />
+          <div className="campo-busqueda">
+            <IconoLupa tamano={17} />
+            <input
+              type="search"
+              aria-label="Términos de búsqueda, ECLI o ROJ"
+              placeholder='Términos, ECLI (ECLI:ES:TS:2014:3877) o ROJ (STS 1234/2020). Operadores: Y, O, NO y "frase exacta"'
+              value={formulario.q}
+              onChange={(e) => actualizar('q', e.target.value)}
+            />
+          </div>
           <button type="submit" className="btn-principal" disabled={cargando}>
+            <IconoMazo tamano={17} />
             {cargando ? 'Consultando CENDOJ…' : 'Buscar'}
           </button>
           <button type="button" className="btn-texto" onClick={() => setAvanzada((v) => !v)} aria-expanded={avanzada}>
+            <IconoFiltro tamano={15} />
             {avanzada ? 'Ocultar filtros' : 'Búsqueda avanzada'}
           </button>
         </div>
@@ -355,7 +457,7 @@ export function Buscador() {
             </div>
 
             <div className="acciones-filtros">
-              <span style={{ fontSize: 12.5, color: 'var(--texto-tenue)' }}>
+              <span className="pista">
                 Todos estos filtros existen en el formulario oficial de CENDOJ y se le envían tal cual.
               </span>
               <button type="button" onClick={limpiar}>
@@ -368,7 +470,7 @@ export function Buscador() {
 
       {historial.length > 0 ? (
         <div className="historial">
-          <span style={{ fontSize: 12.5, color: 'var(--texto-tenue)' }}>Esta sesión:</span>
+          <span className="pista">Esta sesión:</span>
           {historial.map((h) => (
             <button
               key={h}
@@ -388,15 +490,28 @@ export function Buscador() {
       ) : null}
 
       {fallo ? (
-        <div className="aviso aviso-error" role="alert">
-          <strong>{fallo.mensaje}</strong>
-          {fallo.detalle ? <div style={{ marginTop: 4, fontSize: 12.5 }}>Detalle técnico: {fallo.detalle}</div> : null}
-          {fallo.codigo === 'FUENTE_ERROR_TRANSITORIO' || fallo.codigo === 'FUENTE_NO_DISPONIBLE' ? (
-            <div style={{ marginTop: 6, fontSize: 13 }}>
-              No se muestra ningún resultado aproximado: si la fuente oficial no responde, esta aplicación no enseña
-              nada.
-            </div>
-          ) : null}
+        <div className={`aviso ${esCaptcha ? 'aviso-atencion' : 'aviso-error'}`} role="alert">
+          <IconoAviso tamano={17} />
+          <span>
+            <strong>{fallo.mensaje}</strong>
+            {esCaptcha ? (
+              <div style={{ marginTop: 6 }}>
+                El CGPJ interpone un CAPTCHA cuando las consultas no vienen de un navegador con sesión propia. Repite la
+                búsqueda en unos segundos, o hazla directamente en la fuente:{' '}
+                <BotonOficial destino={fallo.urlOficial ?? 'https://www.poderjudicial.es/search/indexAN.jsp'} variante="enlace">
+                  abrir el buscador oficial
+                </BotonOficial>
+                .
+              </div>
+            ) : null}
+            {fallo.detalle ? <div style={{ marginTop: 4, fontSize: 12.5 }}>Detalle técnico: {fallo.detalle}</div> : null}
+            {fallo.codigo === 'FUENTE_ERROR_TRANSITORIO' || fallo.codigo === 'FUENTE_NO_DISPONIBLE' ? (
+              <div style={{ marginTop: 6, fontSize: 13 }}>
+                No se muestra ningún resultado aproximado: si la fuente oficial no responde, esta aplicación no enseña
+                nada.
+              </div>
+            ) : null}
+          </span>
         </div>
       ) : null}
 
@@ -410,12 +525,13 @@ export function Buscador() {
 
       {datos?.avisos.map((a) => (
         <div key={a.mensaje} className={`aviso aviso-${a.tipo}`}>
-          {a.mensaje}
+          <IconoAviso tamano={16} />
+          <span>{a.mensaje}</span>
         </div>
       ))}
 
       {cargando ? (
-        <div className="lista-resultados" aria-busy="true">
+        <div className="lista-resultados" aria-busy="true" style={{ marginTop: 18 }}>
           <span className="oculto-visual">Consultando la fuente oficial…</span>
           {[0, 1, 2, 3].map((i) => (
             <div className="esqueleto" key={i} />
@@ -441,6 +557,7 @@ export function Buscador() {
 
           {datos.resultados.length === 0 ? (
             <div className="panel estado">
+              <IconoLupa tamano={32} />
               <h2>Sin resultados en la fuente oficial</h2>
               <p>
                 CENDOJ no devuelve ninguna resolución para esta consulta. Prueba con menos términos, quita filtros o
@@ -456,17 +573,29 @@ export function Buscador() {
           )}
 
           {datos.resultados.length > 0 && ultimaPagina > 1 ? (
-            <nav className="paginacion" aria-label="Paginación de resultados">
-              <button type="button" onClick={() => irAPagina(pagina - 1)} disabled={pagina <= 1}>
-                Anterior
-              </button>
-              <span>
-                Página {pagina} de {ultimaPagina}
-              </span>
-              <button type="button" onClick={() => irAPagina(pagina + 1)} disabled={pagina >= ultimaPagina}>
-                Siguiente
-              </button>
-            </nav>
+            <>
+              <nav className="paginacion" aria-label="Paginación de resultados">
+                <button type="button" className="btn-flecha" onClick={() => irAPagina(pagina - 1)} disabled={pagina <= 1}>
+                  <IconoFlecha sentido="izquierda" tamano={15} />
+                  Anterior
+                </button>
+                <span className="indicador-pagina">
+                  Página {pagina} de {ultimaPagina}
+                </span>
+                <button
+                  type="button"
+                  className="btn-flecha"
+                  onClick={() => irAPagina(pagina + 1)}
+                  disabled={pagina >= ultimaPagina}
+                >
+                  Siguiente
+                  <IconoFlecha sentido="derecha" tamano={15} />
+                </button>
+              </nav>
+              <p className="atajos">
+                <kbd>←</kbd> página anterior · <kbd>→</kbd> página siguiente
+              </p>
+            </>
           ) : null}
 
           <details className="trazabilidad" style={{ marginTop: 18 }}>
@@ -480,24 +609,13 @@ export function Buscador() {
                 </li>
               ))}
               <li>
-                <a href={datos.consultaEnviada.url} target="_blank" rel="noreferrer">
-                  Abrir esta consulta en el buscador oficial
-                </a>
+                <BotonOficial destino={datos.consultaEnviada.url} variante="enlace">
+                  Abrir el formulario oficial de CENDOJ
+                </BotonOficial>
               </li>
             </ul>
           </details>
         </>
-      ) : null}
-
-      {!cargando && !datos && !fallo && !buscado ? (
-        <div className="panel estado">
-          <h2>Busca jurisprudencia española sobre la fuente oficial</h2>
-          <p>
-            Cada consulta se lanza en directo contra el buscador del CENDOJ (Consejo General del Poder Judicial). Se
-            muestran solo resoluciones que la fuente oficial devuelve, con su ECLI, su ROJ y un enlace al PDF oficial.
-            Si pegas un ECLI, la resolución queda verificada por identificador exacto.
-          </p>
-        </div>
       ) : null}
     </>
   );

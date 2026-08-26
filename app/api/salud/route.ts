@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { flags } from '@/lib/config';
-import { obtenerHtml, urlIndice } from '@/lib/cendoj/sesion';
+import { ErrorFuente, obtenerHtml, urlIndice } from '@/lib/cendoj/sesion';
 import { parsearTotal } from '@/lib/cendoj/parser';
 import { construirParametros, urlBusqueda } from '@/lib/cendoj/parametros';
 
@@ -38,11 +38,22 @@ export async function GET(): Promise<NextResponse> {
       { headers: { 'Cache-Control': 'no-store' } },
     );
   } catch (e) {
+    // Un CAPTCHA no es una caída: la fuente está viva y nos está limitando.
+    // Distinguirlo importa para no salir a arreglar algo que no está roto.
+    const limitado = e instanceof ErrorFuente && e.codigo === 'FUENTE_REQUIERE_CAPTCHA';
+
     return NextResponse.json(
       {
         ...base,
-        estado: 'caido' as const,
+        estado: limitado ? ('limitado' as const) : ('caido' as const),
         contadorLegible: false,
+        ...(limitado
+          ? {
+              motivo:
+                'El CGPJ ha interpuesto su control de descargas masivas para las peticiones que salen de este servidor. ' +
+                'La búsqueda desde el navegador del usuario y los enlaces oficiales siguen funcionando.',
+            }
+          : {}),
         detalle: e instanceof Error ? e.message : String(e),
         msTranscurridos: Date.now() - inicio,
       },

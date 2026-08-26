@@ -4,12 +4,22 @@ import { log } from '../logger';
 /**
  * Gestión de sesión con CENDOJ.
  *
- * Hecho comprobado en la auditoría (ver ARQUITECTURA.md § Auditoría):
- * `search.action` devuelve **403** si se invoca en frío. Hay que visitar antes
- * `indexAN.jsp` para obtener una cookie `JSESSIONID`, y solo entonces la
- * consulta responde. Las sesiones caducan y, cuando eso ocurre, CENDOJ no
- * devuelve un 5xx sino un HTML de cortesía ("Parece que algo ha salido mal"),
- * que este módulo detecta para renovar la sesión y reintentar.
+ * Hechos comprobados contra la fuente en vivo (ver ARQUITECTURA.md § Auditoría):
+ *
+ *  1. `search.action` devuelve **403** en frío. Hay que visitar antes
+ *     `indexAN.jsp` para obtener la cookie `JSESSIONID`.
+ *  2. Cuando algo falla, CENDOJ responde **HTTP 200 con una página de cortesía**
+ *     ("Parece que algo ha salido mal"), nunca un 5xx.
+ *  3. El CGPJ tiene un **control antidescargas masivas**: cuando la IP que
+ *     consulta le parece automatizada, redirige a `captcha.jsp` o
+ *     `captchalogin.jsp`, una página con un CAPTCHA de imagen titulada
+ *     «Control · Descargas masivas».
+ *
+ * El punto 3 es determinante: desde una IP de centro de datos (Vercel) la
+ * descarga del PDF cae SIEMPRE en ese CAPTCHA. Esta aplicación no lo resuelve
+ * ni lo esquiva —es una medida legítima del CGPJ, y su aviso legal prohíbe las
+ * descargas masivas—: lo detecta, lo declara y devuelve al usuario el enlace
+ * oficial para que lo abra con su propio navegador.
  */
 
 type Sesion = { cookie: string; creadaEn: number };
@@ -17,11 +27,15 @@ type Sesion = { cookie: string; creadaEn: number };
 let sesionActual: Sesion | null = null;
 let obtencionEnCurso: Promise<Sesion> | null = null;
 
+export type CodigoFuente = 'FUENTE_NO_DISPONIBLE' | 'FUENTE_ERROR_TRANSITORIO' | 'FUENTE_REQUIERE_CAPTCHA';
+
 export class ErrorFuente extends Error {
   constructor(
     message: string,
-    readonly codigo: 'FUENTE_NO_DISPONIBLE' | 'FUENTE_ERROR_TRANSITORIO',
+    readonly codigo: CodigoFuente,
     readonly detalle?: string,
+    /** Enlace oficial que el usuario puede abrir a mano cuando salta el CAPTCHA. */
+    readonly urlOficial?: string,
   ) {
     super(message);
     this.name = 'ErrorFuente';
@@ -32,12 +46,16 @@ export function urlIndice(): string {
   return `${config.cendoj.baseUrl}/indexAN.jsp`;
 }
 
-function cabecerasBase(cookie?: string): HeadersInit {
+/**
+ * Cabeceras de un cliente HTTP normal. No es un disfraz: es lo que el servidor
+ * de CENDOJ espera, y evita rechazos por cabeceras incompletas.
+ */
+function cabecerasBase(cookie?: string, referer?: string): HeadersInit {
   const h: Record<string, string> = {
     'User-Agent': config.cendoj.userAgent,
     Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
     'Accept-Language': 'es-ES,es;q=0.9',
-    Referer: urlIndice(),
+    Referer: referer ?? urlIndice(),
   };
   if (cookie) h.Cookie = cookie;
   return h;
@@ -66,7 +84,10 @@ function extraerJSessionId(res: Response): string | null {
 }
 
 async function crearSesion(): Promise<Sesion> {
-  const res = await pedirConTimeout(urlIndice(), { method: 'GET', headers: cabecerasBase() });
+  const res = await pedirConTimeout(urlIndice(), {
+    method: 'GET',
+    headers: cabecerasBase(undefined, 'https://www.poderjudicial.es/'),
+  });
   if (!res.ok) {
     throw new ErrorFuente(
       'La fuente oficial (CENDOJ) no responde correctamente.',
@@ -91,6 +112,7 @@ async function crearSesion(): Promise<Sesion> {
 async function obtenerSesion(forzarNueva = false): Promise<Sesion> {
   const caducada = sesionActual !== null && Date.now() - sesionActual.creadaEn > config.cendoj.sesionTtlMs;
   if (!forzarNueva && sesionActual && !caducada) return sesionActual;
+  if (forzarNueva) sesionActual = null;
 
   // Un único intento de renovación concurrente: evita una tormenta de sesiones.
   if (!obtencionEnCurso) {
@@ -111,17 +133,41 @@ export function esPaginaDeError(html: string): boolean {
   return html.includes('errorMessage') || html.includes('Parece que algo ha salido mal');
 }
 
+/**
+ * Detecta el control antidescargas masivas del CGPJ.
+ *
+ * Se reconoce por la URL final (`captcha.jsp`, `captchalogin.jsp`) o por el
+ * formulario de la propia página. Es un CAPTCHA de imagen: solo lo puede pasar
+ * una persona, y así debe ser.
+ *
+ * Detectarlo es una cuestión de honestidad: sin esta comprobación, la página de
+ * CAPTCHA se parsea como una lista de resultados vacía y la aplicación diría
+ * «CENDOJ no ha devuelto ninguna resolución» cuando en realidad no ha buscado.
+ */
+export function esControlDescargas(urlFinal: string, html: string): boolean {
+  if (/\/captcha(login)?\.jsp/i.test(urlFinal)) return true;
+  return html.includes('frmauthenticatecaptcha') || html.includes('Descargas masivas');
+}
+
+const MENSAJE_CAPTCHA =
+  'El Consejo General del Poder Judicial ha activado su control de descargas masivas para esta petición. ' +
+  'Hay que continuar en poderjudicial.es desde tu propio navegador.';
+
 export type RespuestaCendoj = {
   html: string;
   urlFinal: string;
 };
 
 /**
- * GET contra CENDOJ con sesión válida, detección del HTML de error y
- * reintento con sesión nueva. Devuelve siempre HTML útil o lanza `ErrorFuente`.
+ * GET contra CENDOJ con sesión válida, detección del HTML de error y del
+ * control antidescargas, y reintento con sesión nueva.
+ *
+ * Devuelve siempre HTML útil o lanza `ErrorFuente`. Nunca devuelve una página
+ * de CAPTCHA como si fuera una página de resultados vacía.
  */
-export async function obtenerHtml(url: string): Promise<RespuestaCendoj> {
+export async function obtenerHtml(url: string, urlOficialAlternativa?: string): Promise<RespuestaCendoj> {
   let ultimoDetalle = '';
+  let huboCaptcha = false;
 
   for (let intento = 0; intento <= config.cendoj.maxReintentos; intento += 1) {
     const sesion = await obtenerSesion(intento > 0);
@@ -142,6 +188,17 @@ export async function obtenerHtml(url: string): Promise<RespuestaCendoj> {
     }
 
     const html = await res.text();
+    const urlFinal = res.url || url;
+
+    if (esControlDescargas(urlFinal, html)) {
+      // Una sesión nueva puede caer en otro nodo del balanceador y no estar marcada.
+      huboCaptcha = true;
+      ultimoDetalle = 'CENDOJ ha respondido con su control de descargas masivas (CAPTCHA de imagen).';
+      sesionActual = null;
+      await esperar(250 * (intento + 1));
+      continue;
+    }
+
     if (esPaginaDeError(html)) {
       ultimoDetalle = 'CENDOJ devolvió su página de error transitorio.';
       sesionActual = null;
@@ -149,7 +206,16 @@ export async function obtenerHtml(url: string): Promise<RespuestaCendoj> {
       continue;
     }
 
-    return { html, urlFinal: res.url || url };
+    return { html, urlFinal };
+  }
+
+  if (huboCaptcha) {
+    throw new ErrorFuente(
+      MENSAJE_CAPTCHA,
+      'FUENTE_REQUIERE_CAPTCHA',
+      ultimoDetalle,
+      urlOficialAlternativa ?? urlIndice(),
+    );
   }
 
   throw new ErrorFuente(
@@ -159,30 +225,51 @@ export async function obtenerHtml(url: string): Promise<RespuestaCendoj> {
   );
 }
 
-/** GET binario (PDF oficial) con la misma gestión de sesión. */
-export async function obtenerBinario(url: string): Promise<{ datos: ArrayBuffer; tipo: string; nombre: string | null }> {
+export type ResultadoBinario =
+  | { ok: true; datos: ArrayBuffer; nombre: string | null }
+  | { ok: false; motivo: 'captcha'; detalle: string }
+  | { ok: false; motivo: 'no_disponible'; detalle: string };
+
+/**
+ * GET binario (PDF oficial) con la misma gestión de sesión.
+ *
+ * A diferencia del resto de la app, esto **no lanza** cuando salta el CAPTCHA:
+ * devuelve el motivo, para que la interfaz pueda ofrecer la vía oficial en vez
+ * de un error seco. Desde una IP de centro de datos el CAPTCHA es lo habitual,
+ * así que no es una excepción: es un desenlace previsto.
+ */
+export async function obtenerBinario(url: string): Promise<ResultadoBinario> {
+  let detalle = 'La respuesta de CENDOJ no era un PDF.';
+
   for (let intento = 0; intento <= config.cendoj.maxReintentos; intento += 1) {
     const sesion = await obtenerSesion(intento > 0);
     const res = await pedirConTimeout(url, { method: 'GET', headers: cabecerasBase(sesion.cookie) });
     const tipo = res.headers.get('content-type') ?? '';
+    const urlFinal = res.url || url;
 
-    // Sin sesión válida, CENDOJ responde 200 con el HTML del buscador.
-    if (!res.ok || !tipo.includes('pdf')) {
-      sesionActual = null;
-      await esperar(300 * (intento + 1));
-      continue;
+    if (res.ok && tipo.includes('pdf')) {
+      const disp = res.headers.get('content-disposition') ?? '';
+      const nombre = /filename="?([^";]+)"?/i.exec(disp)?.[1] ?? /name="?([^";]+)"?/i.exec(tipo)?.[1] ?? null;
+      return { ok: true, datos: await res.arrayBuffer(), nombre };
     }
 
-    const disp = res.headers.get('content-disposition') ?? '';
-    const nombre = /filename="?([^";]+)"?/i.exec(disp)?.[1] ?? /name="?([^";]+)"?/i.exec(tipo)?.[1] ?? null;
-    return { datos: await res.arrayBuffer(), tipo: 'application/pdf', nombre };
+    // No es un PDF: o es el CAPTCHA, o es el HTML del buscador (sesión sin cebar).
+    const cuerpo = await res.text().catch(() => '');
+    if (esControlDescargas(urlFinal, cuerpo)) {
+      log.warn('CENDOJ exige CAPTCHA para el PDF', { urlFinal: urlFinal.split('?')[0] ?? urlFinal });
+      return {
+        ok: false,
+        motivo: 'captcha',
+        detalle: 'CENDOJ ha redirigido al control de descargas masivas del CGPJ (CAPTCHA de imagen).',
+      };
+    }
+
+    detalle = `Respuesta ${res.status} con tipo "${tipo || 'desconocido'}" en lugar de un PDF.`;
+    sesionActual = null;
+    await esperar(300 * (intento + 1));
   }
 
-  throw new ErrorFuente(
-    'CENDOJ no ha entregado el documento oficial en este momento.',
-    'FUENTE_ERROR_TRANSITORIO',
-    'La respuesta no era un PDF tras agotar los reintentos.',
-  );
+  return { ok: false, motivo: 'no_disponible', detalle };
 }
 
 function esperar(ms: number): Promise<void> {

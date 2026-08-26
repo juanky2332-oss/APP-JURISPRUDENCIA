@@ -1,7 +1,26 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import Link from 'next/link';
+import { Inter, Fraunces } from 'next/font/google';
+import { IconoBalanza, IconoColumna } from '@/components/Iconos';
 import './globals.css';
+
+/**
+ * Tipografía: una serif de titulares con carácter de imprenta jurídica para lo
+ * que se lee de un vistazo, y una sans neutra para lo que se lee despacio.
+ * `display: swap` evita que un fallo de la fuente deje la página en blanco.
+ */
+const texto = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--fuente-texto',
+});
+
+const display = Fraunces({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--fuente-display',
+});
 
 export const metadata: Metadata = {
   title: 'Jurisprudencia oficial — buscador CENDOJ',
@@ -12,16 +31,22 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="es">
+    <html lang="es" className={`${texto.variable} ${display.variable}`}>
       <body>
         <header className="cabecera">
           <div className="contenedor cabecera-fila">
             <Link href="/" className="marca">
-              Jurisprudencia <span>· fuente oficial</span>
+              <span className="marca-emblema">
+                <IconoBalanza tamano={22} />
+              </span>
+              <span style={{ display: 'block' }}>
+                Jurisprudencia
+                <span>Fuente oficial · CENDOJ</span>
+              </span>
             </Link>
             <p className="fuente-oficial">
-              <span className="sello" aria-hidden="true" />
-              Única fuente: CENDOJ · Consejo General del Poder Judicial
+              <IconoColumna tamano={16} />
+              Consejo General del Poder Judicial · consulta en directo
             </p>
           </div>
         </header>
@@ -32,6 +57,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 
         <footer className="pie">
           <div className="contenedor">
+            <p className="pie-marca">
+              <IconoBalanza tamano={18} />
+              Jurisprudencia · fuente oficial
+            </p>
             <p>
               Esta herramienta consulta en tiempo real el buscador oficial de jurisprudencia del CGPJ
               (poderjudicial.es). No mantiene una base de datos propia, no reescribe resoluciones y no genera texto
@@ -41,7 +70,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <p>
               Los documentos son propiedad del Consejo General del Poder Judicial y están sujetos a su aviso legal, que
               limita el uso a fines particulares y prohíbe las descargas masivas y la explotación comercial sin
-              autorización previa. Antes de citar, contrasta siempre en la fuente oficial.
+              autorización previa. Por eso los documentos oficiales se abren en poderjudicial.es con tu propia sesión.
+              Antes de citar, contrasta siempre en la fuente oficial.
             </p>
             <p>
               <Link href="/api/salud">Estado de la integración</Link>
