@@ -1,0 +1,211 @@
+# APP-JURISPRUDENCIA
+
+Buscador de jurisprudencia española que consulta **exclusivamente la fuente oficial**: el buscador del
+**CENDOJ** (Centro de Documentación Judicial del Consejo General del Poder Judicial), en
+`poderjudicial.es`.
+
+No hay base de datos propia, no hay copias de sentencias, no hay resúmenes generados y no hay ninguna
+otra fuente. Si CENDOJ no lo devuelve, la aplicación no lo enseña.
+
+---
+
+## Qué hace
+
+- **Busca** por texto libre con los operadores del buscador oficial (`Y`, `O`, `NO`, `"frase exacta"`).
+- **Filtra** por jurisdicción, tipo de órgano, tipo de resolución, fechas, ponente, nº de recurso,
+  nº de resolución, legislación citada e idioma — todos ellos filtros reales del formulario del CGPJ.
+- **Detecta identificadores**: si pegas un ECLI (`ECLI:ES:TS:2014:3877`) o un ROJ (`STS 1234/2020`) en
+  la caja de búsqueda, consulta por identificador exacto en vez de por texto.
+- **Verifica**: cualquier resultado puede comprobarse contra CENDOJ por su ECLI, y la interfaz distingue
+  visualmente tres estados: *localizado*, *verificado* y *no verificado*.
+- **Muestra el documento oficial**: sirve el PDF publicado por el CGPJ tal cual, sin modificarlo.
+- **Extrae fragmentos literales** del PDF: subcadenas exactas que contienen tus términos, con su número
+  de página. Nunca un resumen.
+- **Genera citas** a partir de los campos que CENDOJ ha devuelto, omitiendo los que faltan.
+
+## Qué NO hace, deliberadamente
+
+- No redacta resúmenes, doctrina ni fundamentos jurídicos.
+- No rellena un campo que CENDOJ no publique: lo marca como **«dato no disponible»**.
+- No completa la lista de resultados con otras fuentes cuando CENDOJ devuelve poco.
+- No guarda ni cachea resoluciones. Cada consulta va en directo a la fuente oficial.
+- No hace descargas masivas ni recorre el repertorio de forma automatizada.
+
+---
+
+## Arranque rápido
+
+Requisitos: **Node.js 20.9 o superior**.
+
+```bash
+npm install
+npm run dev
+```
+
+Abre <http://localhost:3000>. No hace falta ningún `.env`: la aplicación arranca con valores por
+defecto y **no necesita ninguna API key** (CENDOJ no ofrece API ni credenciales).
+
+Si quieres ajustar tiempos de espera, límites o feature flags:
+
+```bash
+cp .env.example .env.local
+```
+
+## Comandos
+
+| Comando | Qué hace |
+| --- | --- |
+| `npm run dev` | Servidor de desarrollo en <http://localhost:3000>. |
+| `npm run build` | Build de producción. |
+| `npm start` | Sirve el build de producción. |
+| `npm test` | Tests unitarios (Vitest) sobre respuestas reales de CENDOJ guardadas como fixtures. |
+| `npm run typecheck` | Comprobación de tipos (TypeScript estricto). |
+| `npm run verify` | `typecheck` + `test`. Ejecútalo antes de desplegar. |
+| `npm run audit:cendoj` | **Auditoría en vivo de la fuente oficial** (ver más abajo). |
+
+### `npm run audit:cendoj`
+
+Es la herramienta de diagnóstico del proyecto. Vuelve a leer el formulario oficial de CENDOJ y lanza
+consultas reales para comprobar, una por una, que las suposiciones sobre las que está construida la app
+siguen siendo ciertas: que el formulario existe, que la acción sigue siendo `search.action`, que los
+parámetros que enviamos siguen ahí, que los filtros se aplican y que una búsqueda por ECLI devuelve
+exactamente una resolución.
+
+Ejecútala cuando la app empiece a devolver fichas vacías: te dirá exactamente qué ha cambiado.
+
+```
+1. Formulario oficial (https://www.poderjudicial.es/search/indexAN.jsp)
+  OK   El formulario de jurisprudencia sigue existiendo
+  OK   La acción sigue siendo search.action
+  OK   Todos los parámetros que usa la app siguen en el formulario   44 campos detectados
+  ...
+2. Consultas reales
+  OK   La búsqueda por ECLI devuelve exactamente una resolución   total=1 devueltos=1
+  OK   Un ECLI inexistente no devuelve nada (no hay falsos positivos)
+```
+
+---
+
+## Cómo probarlo
+
+1. **Texto libre**: escribe `arrendamiento urbano desahucio`, despliega *Búsqueda avanzada* y elige
+   jurisdicción **Civil**. Verás el número real de resultados que declara CENDOJ y un aviso de que solo
+   entrega 200 documentos por consulta.
+2. **Operadores**: prueba `alimentos NO hijos` y compara el total con `alimentos hijos`.
+3. **Frase exacta**: `"pensión de alimentos"`.
+4. **Verificación positiva**: pega `ECLI:ES:TS:2014:3877` en la caja. Devuelve una única resolución con
+   la insignia verde **Verificado**.
+5. **Verificación negativa**: pega `ECLI:ES:TS:1999:999999`. La aplicación dice que CENDOJ no lo
+   confirma, en rojo, y no muestra nada más.
+6. **Documento oficial**: en cualquier resultado, *Abrir PDF oficial*. Se sirve el PDF del CGPJ.
+7. **Fragmentos literales**: entra en *Ver ficha completa* y pulsa *Buscar fragmentos en el documento*.
+   Salen las apariciones exactas de tus términos con su página. Si no aparecen, lo dice — no inventa.
+8. **Estado del sistema**: <http://localhost:3000/api/salud>.
+
+---
+
+## API
+
+Todos los endpoints son `GET` y devuelven JSON (salvo `/api/documento`, que devuelve el PDF).
+
+| Endpoint | Descripción |
+| --- | --- |
+| `/api/buscar` | Búsqueda. Parámetros: `q`, `jurisdiccion`, `tipoOrgano`, `tipoResolucion` (repetible), `fechaDesde`, `fechaHasta` (AAAA-MM-DD), `ponente`, `numeroRecurso`, `numeroResolucion`, `norma`, `idioma`, `ecli`, `roj`, `orden`, `pagina`, `porPagina`. |
+| `/api/verificar` | `?id=<ECLI o ROJ>`. Comprueba contra CENDOJ y devuelve `verificado` o `no_verificable`. |
+| `/api/documento` | `?id=<hex>&fecha=<AAAAMMDD>`. Sirve el PDF oficial. |
+| `/api/texto` | `?id=&fecha=&q=`. Fragmentos literales del PDF + metadatos internos del documento. |
+| `/api/salud` | Estado de la integración con la fuente oficial. |
+
+Todas las respuestas de error tienen la misma forma:
+
+```json
+{ "ok": false, "codigo": "FUENTE_ERROR_TRANSITORIO", "mensaje": "…", "detalle": "…" }
+```
+
+Códigos: `PARAMETROS_INVALIDOS` (400), `LIMITE_PETICIONES` (429), `FUENTE_NO_DISPONIBLE` (502),
+`FUENTE_ERROR_TRANSITORIO` (503), `FUNCION_DESACTIVADA` (503), `ERROR_INTERNO` (500).
+
+---
+
+## Los tres estados de verificación
+
+La interfaz nunca dice «verificado» por defecto. Cada estado significa un hecho comprobable:
+
+| Estado | Significa |
+| --- | --- |
+| **Localizado** (ámbar) | Apareció en una página de resultados oficial de CENDOJ, pero no se ha comprobado individualmente. |
+| **Verificado** (verde) | Se consultó CENDOJ por su ECLI o ROJ exacto y la fuente devolvió esa misma resolución. |
+| **No verificado** (rojo) | Se ejecutó la comprobación y CENDOJ **no** lo confirma. No lo cites. |
+| **Sin comprobar** (gris) | La verificación está desactivada por configuración de la instancia. |
+
+---
+
+## Despliegue en Vercel
+
+El proyecto está listo para Vercel sin configuración adicional (no hay variables obligatorias).
+
+```bash
+npm i -g vercel
+vercel          # despliegue de preview
+vercel --prod   # producción
+```
+
+O conectando el repositorio desde el panel de Vercel: framework **Next.js**, comando de build `npm run
+build`, sin variables de entorno.
+
+Consideraciones de plataforma:
+
+- Todas las rutas de API son **Node.js runtime** y `force-dynamic`: nunca se cachean respuestas de CENDOJ.
+- `/api/texto` procesa un PDF y declara `maxDuration = 60`.
+- El *rate limiting* es en memoria del proceso, por lo que en serverless es **por instancia**. Ver
+  [ARQUITECTURA.md](ARQUITECTURA.md) § Riesgos.
+
+---
+
+## Estructura
+
+```
+app/
+  page.tsx              Buscador
+  resolucion/page.tsx   Ficha de una resolución
+  api/                  buscar · verificar · documento · texto · salud
+components/             Buscador, TarjetaResultado, FichaResolucion, insignias, resaltado
+lib/
+  cendoj/
+    sesion.ts           Sesión con CENDOJ (JSESSIONID), reintentos, detección de su página de error
+    parametros.ts       Traducción a los campos del formulario oficial
+    parser.ts           HTML de CENDOJ → datos tipados (o null)
+    catalogos.ts        Códigos oficiales extraídos del formulario
+    servicio.ts         Orquestación: consulta → parseo → verificación
+  consulta.ts           Normalización de la consulta y detección de ambigüedad
+  ranking.ts            Reordenado propio, explicable
+  pdf.ts                Texto, metadatos y fragmentos literales del PDF oficial
+  ecli.ts               Validación y desglose de ECLI/ROJ
+  cita.ts               Construcción de citas
+scripts/auditar-cendoj.ts   Auditoría en vivo de la fuente
+tests/                  Vitest + fixtures con HTML real de CENDOJ
+```
+
+Detalle completo del diseño, de las limitaciones reales y de los riesgos en
+**[ARQUITECTURA.md](ARQUITECTURA.md)**. Mejoras previstas en **[ROADMAP.md](ROADMAP.md)**.
+
+---
+
+## Aviso legal
+
+Los contenidos del buscador de jurisprudencia son titularidad del **Consejo General del Poder Judicial**
+y están sujetos a su aviso legal, que **limita el acceso a fines particulares** y **prohíbe expresamente
+las descargas masivas de resoluciones y su explotación comercial** sin autorización previa del CGPJ.
+
+Esta aplicación está diseñada para respetar ese marco:
+
+- Consulta bajo demanda de una persona, nunca recorridos automáticos del repertorio.
+- Sin almacenamiento ni cacheo de resoluciones.
+- Límite de peticiones por usuario.
+- Enlace permanente a la fuente oficial en cada resultado.
+
+Aun así, **el uso que hagas de esta herramienta es tu responsabilidad**. Si vas a explotarla
+comercialmente o a un volumen apreciable, solicita autorización al CENDOJ. Y antes de citar cualquier
+resolución en un escrito, contrástala en la fuente oficial.
+
+Esta herramienta no presta asesoramiento jurídico.

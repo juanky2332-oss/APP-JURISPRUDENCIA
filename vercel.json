@@ -1,0 +1,22 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "nextjs",
+  "buildCommand": "npm run build",
+  "installCommand": "npm install",
+  "regions": ["cdg1"],
+  "functions": {
+    "app/api/texto/route.ts": { "maxDuration": 60 },
+    "app/api/documento/route.ts": { "maxDuration": 30 },
+    "app/api/buscar/route.ts": { "maxDuration": 30 },
+    "app/api/verificar/route.ts": { "maxDuration": 30 }
+  },
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store" },
+        { "key": "X-Fuente-Datos", "value": "CENDOJ - Consejo General del Poder Judicial" }
+      ]
+    }
+  ]
+}
