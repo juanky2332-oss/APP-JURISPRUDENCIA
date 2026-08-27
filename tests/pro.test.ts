@@ -6,6 +6,7 @@ import { materiasDe, urlSumarioOficial } from '../lib/boe';
 import { aCsv, aMarkdown, aTextoParaEscrito, citaDe, nombreArchivo } from '../lib/dossier';
 import { calcularNovedades, type Alerta } from '../lib/alertas';
 import { sanearFiltros } from '../lib/traductor';
+import { urlCanonicaSiProcede } from '../lib/despliegue';
 import type { Carpeta } from '../lib/carpetas';
 
 beforeAll(() => {
@@ -312,5 +313,42 @@ describe('saneado de los filtros que devuelve la IA', () => {
     expect(f?.q.length).toBe(300);
     expect(f?.ponente?.length).toBe(120);
     expect(f?.razonamiento.length).toBe(400);
+  });
+});
+
+describe('aviso de despliegue congelado', () => {
+  const CANON = 'https://firme-legal.vercel.app';
+  const en = (host: string, pathname = '/buscar', search = '') => ({ host, pathname, search });
+
+  it('avisa en una URL de despliegue de Vercel', () => {
+    // El caso real: el portátil abría esta dirección, de dos horas antes, y la
+    // caja de preguntas no existía todavía en ese código.
+    expect(urlCanonicaSiProcede(en('app-jurisprudencia-b1xfq5n1u-juan-carlos-projects-9a60b692.vercel.app'), CANON))
+      .toBe('https://firme-legal.vercel.app/buscar');
+  });
+
+  it('conserva la ruta y los parámetros para no perder al usuario', () => {
+    expect(urlCanonicaSiProcede(en('otro-despliegue.vercel.app', '/buscar', '?q=alimentos&jurisdiccion=CIVIL'), CANON))
+      .toBe('https://firme-legal.vercel.app/buscar?q=alimentos&jurisdiccion=CIVIL');
+  });
+
+  it('no avisa en el dominio bueno', () => {
+    expect(urlCanonicaSiProcede(en('firme-legal.vercel.app'), CANON)).toBeNull();
+  });
+
+  it('no distingue mayúsculas en el dominio', () => {
+    expect(urlCanonicaSiProcede(en('FIRME-LEGAL.VERCEL.APP'), CANON)).toBeNull();
+  });
+
+  it('no molesta en desarrollo local', () => {
+    for (const h of ['localhost:3000', '127.0.0.1:3000', '[::1]:3000', 'localhost']) {
+      expect(urlCanonicaSiProcede(en(h), CANON), h).toBeNull();
+    }
+  });
+
+  it('se calla si no hay dominio canónico configurado o está mal escrito', () => {
+    expect(urlCanonicaSiProcede(en('lo-que-sea.vercel.app'), undefined)).toBeNull();
+    expect(urlCanonicaSiProcede(en('lo-que-sea.vercel.app'), '')).toBeNull();
+    expect(urlCanonicaSiProcede(en('lo-que-sea.vercel.app'), 'esto-no-es-una-url')).toBeNull();
   });
 });

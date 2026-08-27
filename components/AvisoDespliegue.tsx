@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { urlCanonicaSiProcede } from '@/lib/despliegue';
 
 /**
  * Aviso de «estás en una copia antigua».
@@ -21,21 +22,18 @@ export function AvisoDespliegue() {
   const [destino, setDestino] = useState<string | null>(null);
 
   useEffect(() => {
-    const canonica = process.env['NEXT_PUBLIC_SITE_URL'];
-    if (!canonica) return;
-
-    let host: string;
-    try {
-      host = new URL(canonica).host;
-    } catch {
-      return;
-    }
-
-    const actual = window.location.host;
-    const enLocal = /^(localhost|127\.0\.0\.1|\[::1\])(:\d+)?$/.test(actual);
-    if (enLocal || actual === host) return;
-
-    setDestino(`${new URL(canonica).origin}${window.location.pathname}${window.location.search}`);
+    // La decisión vive en lib/despliegue.ts, donde sí se puede probar: estas
+    // URL están protegidas y no hay forma de comprobarlas abriéndolas.
+    setDestino(
+      urlCanonicaSiProcede(
+        {
+          host: window.location.host,
+          pathname: window.location.pathname,
+          search: window.location.search,
+        },
+        process.env['NEXT_PUBLIC_SITE_URL'],
+      ),
+    );
   }, []);
 
   if (!destino) return null;
