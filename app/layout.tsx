@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { Newsreader, IBM_Plex_Sans, IBM_Plex_Mono } from 'next/font/google';
 import { Emblema } from '@/components/Marca';
+import { AvisoDespliegue } from '@/components/AvisoDespliegue';
 import { IconoColumna } from '@/components/Iconos';
 import { MARCA, urlBase } from '@/lib/marca';
 import { RUTAS } from '@/lib/rutas';
@@ -69,6 +70,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <a className="saltar" href="#contenido">
           Saltar al contenido
         </a>
+
+        <AvisoDespliegue />
 
         <header className="cabecera">
           <div className="contenedor cabecera-fila">

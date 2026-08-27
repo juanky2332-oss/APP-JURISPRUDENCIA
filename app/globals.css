@@ -3747,3 +3747,46 @@ kbd {
     min-width: 240px;
   }
 }
+
+/* ------------------------------------------- aviso de despliegue antiguo */
+
+/* Una URL de despliegue de Vercel es una foto congelada del código de ese
+   momento. Quien la guarda en marcadores puede pasar semanas viendo fallos ya
+   arreglados sin entender por qué. Este aviso lo dice y da el enlace bueno. */
+.aviso-despliegue {
+  position: relative;
+  z-index: 40;
+  padding: 11px 0;
+  background: var(--ambar-tenue);
+  border-bottom: 1px solid color-mix(in srgb, var(--ambar) 45%, transparent);
+  color: var(--ambar);
+}
+
+.aviso-despliegue p {
+  margin: 0;
+  font-size: 13.6px;
+  line-height: 1.55;
+  text-align: center;
+}
+
+.aviso-despliegue strong {
+  font-weight: 650;
+}
+
+.aviso-despliegue a {
+  color: var(--ambar);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  white-space: nowrap;
+}
+
+.aviso-despliegue a:hover {
+  color: var(--texto);
+}
+
+@media print {
+  .aviso-despliegue {
+    display: none;
+  }
+}
