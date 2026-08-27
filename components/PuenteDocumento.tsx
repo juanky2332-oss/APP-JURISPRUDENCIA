@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { BotonOficial } from './BotonOficial';
 import { IconoDocumento, IconoFlecha, IconoAviso } from './Iconos';
 import { urlPdfOficial } from '@/lib/enlaces';
+import { RUTAS } from '@/lib/rutas';
 
 /**
  * Explica el control de descargas masivas del CGPJ y lleva al documento.
@@ -27,7 +28,7 @@ export function PuenteDocumento() {
     if (id) p.set('id', id);
     if (fecha) p.set('fecha', fecha);
     const qs = p.toString();
-    return qs === '' ? '/' : `/resolucion?${qs}`;
+    return qs === '' ? RUTAS.buscador : `${RUTAS.resolucion}?${qs}`;
   })();
 
   if (!parametrosValidos) {
@@ -40,7 +41,7 @@ export function PuenteDocumento() {
           documento desde la resolución.
         </p>
         <p style={{ marginTop: 16 }}>
-          <Link className="btn-flecha" href="/">
+          <Link className="btn-flecha" href={RUTAS.buscador}>
             <IconoFlecha sentido="izquierda" tamano={15} />
             Volver al buscador
           </Link>

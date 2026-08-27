@@ -56,5 +56,5 @@ export function enlaceFicha(entrada: EntradaNavegacion, q: string): string {
   if (entrada.id) p.set('id', entrada.id);
   if (entrada.fecha) p.set('fecha', entrada.fecha);
   if (q) p.set('q', q);
-  return `/resolucion?${p.toString()}`;
+  return `/resolucion?${p.toString()}`; // ver RUTAS.resolucion
 }

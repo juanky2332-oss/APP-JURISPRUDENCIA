@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { enlaceFicha, leerContexto, posicionEn, type ContextoNavegacion } from '@/lib/navegacion';
+import { RUTAS, enlaceBuscador } from '@/lib/rutas';
 import { IconoFlecha, IconoLupa } from './Iconos';
 
 /**
@@ -34,7 +35,11 @@ export function NavegacionFichas({ ecli, id, consulta }: { ecli: string; id: str
   }, [contexto, ecli, id]);
 
   const q = contexto?.q ?? consulta;
-  const volver = contexto?.busqueda ? `/?${contexto.busqueda}` : q ? `/?q=${encodeURIComponent(q)}` : '/';
+  const volver = contexto?.busqueda
+    ? enlaceBuscador(contexto.busqueda)
+    : q
+      ? enlaceBuscador(`q=${encodeURIComponent(q)}`)
+      : RUTAS.buscador;
 
   // Flechas del teclado, salvo cuando el foco está escribiendo en un campo.
   useEffect(() => {

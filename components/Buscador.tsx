@@ -16,6 +16,7 @@ import {
 } from './Iconos';
 import { normalizarConsulta } from '@/lib/consulta';
 import { guardarContexto } from '@/lib/navegacion';
+import { RUTAS, enlaceBuscador } from '@/lib/rutas';
 import {
   IDIOMAS,
   JURISDICCIONES,
@@ -165,7 +166,7 @@ export function Buscador() {
       setBuscado(true);
 
       const parametros = aParametros(f, paginaSolicitada);
-      router.replace(`/?${parametros.toString()}`, { scroll: false });
+      router.replace(enlaceBuscador(parametros.toString()), { scroll: false });
 
       try {
         const res = await fetch(`/api/buscar?${parametros.toString()}`, { signal: controlador.signal });
@@ -243,7 +244,7 @@ export function Buscador() {
     setDatos(null);
     setFallo(null);
     setBuscado(false);
-    router.replace('/', { scroll: false });
+    router.replace(RUTAS.buscador, { scroll: false });
   }
 
   function enviar(e: React.FormEvent) {

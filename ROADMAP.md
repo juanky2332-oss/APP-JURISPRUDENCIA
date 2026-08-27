@@ -8,6 +8,21 @@ introducir texto que no proceda de CENDOJ o de una transformación declarada de 
 
 ---
 
+## Hecho
+
+### Marca, portada y páginas legales · 27 de agosto de 2026
+El proyecto se llama **Firme** y tiene identidad propia (violeta de sello y verde de bronce sobre
+papel frío; Newsreader, IBM Plex Sans e IBM Plex Mono). El buscador se ha movido a `/buscar` y `/` es
+ahora una portada con demostración animada, doce consultas de ejemplo que enlazan al buscador con sus
+filtros puestos, planes, preguntas frecuentes y datos estructurados de schema.org. Se han añadido las
+cuatro páginas legales, `robots.txt` y `sitemap.xml`.
+
+Los datos de la demostración del hero (STS 564/2014, `ECLI:ES:TS:2014:3877`) están copiados de una
+consulta real a CENDOJ. **Si se cambia la demostración, hay que volver a consultar la fuente**: una
+sentencia inventada en la portada de esta aplicación concreta sería una contradicción en los términos.
+
+---
+
 ## Prioridad alta — próximo bloque
 
 ### 1. Carpetas de trabajo y exportación de dossier
@@ -31,7 +46,8 @@ fecha).
 *Por qué:* convierte la herramienta de puntual en recurrente.
 *Complicación:* exige almacenamiento y un proceso programado. **Requiere revisar el aviso legal del CGPJ
 antes de implementarlo**: consultas periódicas automáticas rozan el límite de lo que es «uso
-particular». Empezar con frecuencias bajas (diaria) y por usuario.
+particular». Empezar con frecuencias bajas (diaria) y por usuario. Conviene tener contestada antes la
+consulta de `docs/consulta-cendoj.md`.
 
 ### 4. Índice de la resolución y navegación por fundamentos
 Detectar los encabezados literales del PDF (`ANTECEDENTES DE HECHO`, `FUNDAMENTOS DE DERECHO`,
@@ -128,8 +144,13 @@ Salida en BibTeX / RIS / Zotero.
 Cuentas, carpetas compartidas y trazabilidad de quién consultó qué.
 
 *Por qué:* es el paso natural hacia producto.
-*Complicación:* **es también el punto en el que hace falta autorización del CENDOJ**, porque deja de ser
-uso particular. No debería abordarse antes de tener esa conversación.
+*Complicación:* **es el punto en el que deja de ser uso particular.** Matiz importante y verificado: no
+existe hoy una licencia con tarifa que comprar. El Reglamento 3/2010 del CGPJ, que la habría creado,
+fue declarado nulo de pleno derecho por el Pleno de la Sala Tercera del Tribunal Supremo el 28 de
+octubre de 2011 —el CGPJ carecía de potestad reglamentaria sobre la actividad de terceros— y no se
+sustituyó. Lo que queda es el aviso legal del buscador, que remite a un procedimiento no publicado.
+De ahí `docs/consulta-cendoj.md`: preguntar por escrito y guardar la respuesta. No abordar esto antes
+de tener esa conversación.
 
 ---
 

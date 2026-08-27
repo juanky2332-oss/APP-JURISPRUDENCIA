@@ -179,6 +179,24 @@ la indicación explícita de no citarla.
 - Bajo la lista, un desplegable muestra **la consulta exacta enviada a CENDOJ**, parámetro a parámetro,
   y un enlace para reproducirla a mano en el buscador oficial.
 
+### Capa 5 — Portada y marca
+
+Separada a propósito de la herramienta. `/` es una portada estática que no llama a CENDOJ ni una sola
+vez; la herramienta vive en `/buscar`. Las tres piezas que sostienen esa separación:
+
+- `lib/marca.ts` — nombre, promesa, planes y preguntas frecuentes. De ahí salen a la vez la portada,
+  los metadatos y los datos estructurados de schema.org, así que un precio no puede decir una cosa en
+  un sitio y otra en otro.
+- `lib/rutas.ts` — todas las rutas en un punto. El buscador vivía en `/` y se movió sin dejar enlaces
+  rotos porque ninguna ruta estaba escrita a mano en un componente.
+- `components/portada/DemoConsulta.tsx` — la demostración animada del hero. Sus datos están copiados
+  de una consulta real a CENDOJ y así debe seguir siendo: una sentencia inventada en la portada de
+  esta aplicación sería una contradicción con todo lo demás que hay en este documento.
+
+`robots.ts` deja fuera del índice `/buscar`, `/resolucion`, `/documento` y `/api/`. No es un detalle de
+SEO: indexar esas rutas sería construir por la puerta de atrás el índice propio de resoluciones que
+este proyecto ha decidido no tener.
+
 ---
 
 ## 3. Flujo de una búsqueda
@@ -299,8 +317,21 @@ masivas** y la **explotación comercial** sin autorización previa.
 | Atribución | Cada resultado y el pie de página identifican al CGPJ como fuente y enlazan a ella. |
 | Datos personales de las resoluciones | Se muestran tal y como los publica CENDOJ, que ya aplica su propia anonimización. La app no los almacena ni los reindexa. |
 
-**Recomendación explícita:** antes de un uso comercial o de un volumen apreciable, solicita autorización
-al CENDOJ. Este proyecto no la sustituye.
+**Recomendación explícita:** antes de un uso comercial o de un volumen apreciable, pregunta por escrito
+al CENDOJ. El escrito está redactado en `docs/consulta-cendoj.md`. Este proyecto no lo sustituye.
+
+Matiz que conviene tener documentado, porque es contraintuitivo y está verificado: **no existe hoy una
+licencia con tarifa publicada que se pueda comprar.** El Reglamento 3/2010 del CGPJ, que establecía
+licencias-tipo anuales y precios públicos para la reutilización de sentencias, fue declarado **nulo de
+pleno derecho** por el Pleno de la Sala Tercera del Tribunal Supremo en sentencia de **28 de octubre de
+2011**: el CGPJ carecía de potestad reglamentaria para regular una actividad desarrollada por terceros
+fuera del Poder Judicial, y faltaba el informe económico-financiero exigido para fijar precios públicos.
+No se sustituyó por otra norma.
+
+Lo que queda vigente es el aviso legal del propio buscador, que remite a «el procedimiento y las
+condiciones establecidas por el CGPJ a través de su Centro de Documentación Judicial» — procedimiento
+que **no está publicado en ninguna parte**. De ahí que la vía correcta sea preguntar y conservar la
+respuesta, no rellenar un formulario que no existe.
 
 ---
 

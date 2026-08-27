@@ -1,4 +1,7 @@
-# APP-JURISPRUDENCIA
+# Firme
+
+> **Jurisprudencia firme y reutilizable.**
+> Encuentra resoluciones recurrentes, ECLI y citas que suelen sostener escritos.
 
 Buscador de jurisprudencia española que consulta **exclusivamente la fuente oficial**: el buscador del
 **CENDOJ** (Centro de Documentación Judicial del Consejo General del Poder Judicial), en
@@ -47,7 +50,8 @@ npm install
 npm run dev
 ```
 
-Abre <http://localhost:3000>. No hace falta ningún `.env`: la aplicación arranca con valores por
+Abre <http://localhost:3000> para la portada, o <http://localhost:3000/buscar> para ir directo a la
+herramienta. No hace falta ningún `.env`: la aplicación arranca con valores por
 defecto y **no necesita ninguna API key** (CENDOJ no ofrece API ni credenciales).
 
 Si quieres ajustar tiempos de espera, límites o feature flags:
@@ -109,6 +113,28 @@ Ejecútala cuando la app empiece a devolver fichas vacías: te dirá exactamente
 7. **Fragmentos literales**: entra en *Ver ficha completa* y pulsa *Buscar fragmentos en el documento*.
    Salen las apariciones exactas de tus términos con su página. Si no aparecen, lo dice — no inventa.
 8. **Estado del sistema**: <http://localhost:3000/api/salud>.
+9. **Portada**: <http://localhost:3000>. Las doce consultas de ejemplo son enlaces reales al buscador
+   con sus filtros puestos; ninguna es decorativa.
+
+---
+
+## Rutas
+
+| Ruta | Qué es | ¿Se indexa? |
+| --- | --- | --- |
+| `/` | Portada: promesa, demostración, precios y preguntas frecuentes. | Sí |
+| `/buscar` | La herramienta. Todo el estado de la búsqueda vive en la URL. | No |
+| `/resolucion` | Ficha de una resolución, con fragmentos literales y cita. | No |
+| `/documento` | Puente hacia el PDF oficial, con el aviso del control antidescargas. | No |
+| `/aviso-legal`, `/terminos`, `/privacidad`, `/cookies` | Páginas legales. | Sí |
+| `/api/*` | Endpoints JSON. Ver más abajo. | No |
+
+Las rutas están centralizadas en `lib/rutas.ts`: si una cambia, cambia ahí y no se queda ningún
+enlace apuntando al sitio antiguo.
+
+La identidad —nombre, promesa, planes y preguntas frecuentes— vive en `lib/marca.ts`, y de ahí salen
+a la vez la portada, los metadatos y los datos estructurados de schema.org. Un precio no puede
+desviarse de otro porque solo está escrito una vez.
 
 ---
 
