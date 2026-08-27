@@ -91,7 +91,7 @@ export default function Portada() {
           </p>
 
           <h1>
-            Del caso al <em>fundamento</em>, con respaldo oficial
+            Del caso al <em>fundamento</em>,<span>con respaldo oficial</span>
           </h1>
 
           <p className="hero-lede">

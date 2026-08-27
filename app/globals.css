@@ -3790,3 +3790,10 @@ kbd {
     display: none;
   }
 }
+
+/* El titular son dos ideas, no una frase larga: «del caso al fundamento» y
+   «con respaldo oficial». Se parte por su coma en vez de dejar que el ajuste
+   automático corte donde caiga, que dejaba la coma colgando al final de línea. */
+.hero h1 span {
+  display: block;
+}
