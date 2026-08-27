@@ -72,6 +72,7 @@ cp .env.example .env.local
 | `npm run verify` | `typecheck` + `test`. Ejecútalo antes de desplegar. |
 | `npm run audit:cendoj` | **Auditoría en vivo de la fuente oficial** (ver más abajo). |
 | `npm run licencia -- --correo x@y.es` | Emite una licencia Pro y la comprueba antes de entregarla. |
+| `npm run probar:pro` | **Prueba del plan Pro de extremo a extremo** conduciendo un navegador real: activa la licencia, verifica un escrito contra CENDOJ, guarda en carpeta, exporta el dossier y comprueba la factura. Acepta una URL para probar producción. |
 
 ### `npm run audit:cendoj`
 
