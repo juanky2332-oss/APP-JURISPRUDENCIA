@@ -1,5 +1,13 @@
+import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import { PuenteDocumento } from '@/components/PuenteDocumento';
+
+// Igual que la ficha: si alguien pega este enlace, que se vea de qué es.
+export const metadata: Metadata = {
+  title: 'Documento oficial',
+  description: 'Apertura del PDF oficial de una resolución en poderjudicial.es, por la vía que permite el CGPJ.',
+  robots: { index: false, follow: true },
+};
 
 export const dynamic = 'force-dynamic';
 

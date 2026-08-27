@@ -54,6 +54,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'es_ES',
+    url: urlBase(),
     siteName: MARCA.nombre,
     title: `${MARCA.nombre} — ${MARCA.claim}`,
     description: MARCA.descripcion,

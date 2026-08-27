@@ -14,10 +14,14 @@ export const MARCA = {
     'Encuentra resoluciones recurrentes, ECLI y citas que suelen sostener escritos. Todo sale del buscador oficial del CENDOJ, en directo, y se puede comprobar una por una.',
   descripcionCorta:
     'Buscador de jurisprudencia española sobre la fuente oficial del CENDOJ, con verificación por ECLI y fragmentos literales.',
-  /** Dominio previsto. Se usa en los datos estructurados y en el aviso legal. */
+  /**
+   * Dominio *previsto*, todavía no comprado. No se pinta en ninguna página a
+   * propósito: enseñar una dirección que no resuelve sería el mismo tipo de
+   * dato verosímil y falso que esta aplicación existe para evitar.
+   */
   dominio: 'firme.legal',
-  /** Correo de contacto. Cámbialo cuando esté dado de alta. */
-  correo: 'hola@firme.legal',
+  /** Correo de contacto real. Se usa en los botones y en las páginas legales. */
+  correo: 'juancarlos@flownexion.com',
   /** Titular del sitio, para las páginas legales. */
   titular: 'Firme',
 } as const;
@@ -41,7 +45,21 @@ export type Plan = {
   importeMensual: number;
   incluye: readonly string[];
   llamada: string;
+  /** Asunto del correo que abre el botón. Sin destino real, el botón mentiría. */
+  asunto: string;
 };
+
+/**
+ * Enlace de contacto con el asunto ya escrito.
+ *
+ * Mientras no haya cuentas ni pasarela de pago, el botón tiene que hacer algo
+ * que de verdad ocurra. Un `mailto` con el asunto puesto es poco vistoso y es
+ * honesto: quien lo pulsa acaba escribiendo, y eso es exactamente lo que dice
+ * el botón.
+ */
+export function enlaceContacto(asunto: string): string {
+  return `mailto:${MARCA.correo}?subject=${encodeURIComponent(asunto)}`;
+}
 
 export const PLANES: readonly Plan[] = [
   {
@@ -56,12 +74,13 @@ export const PLANES: readonly Plan[] = [
     incluye: [
       'Jurisprudencia oficial del CENDOJ, sin límite',
       'Verificación por ECLI con la respuesta textual del CGPJ',
-      'Fragmentos literales del PDF, con su número de página',
+      'El recorte literal de CENDOJ en cada resultado, con tus términos resaltados',
       'Filtros completos del formulario oficial',
       '25 preguntas en lenguaje natural al mes',
       '3 verificaciones de escrito al mes',
     ],
     llamada: 'Pedir invitación',
+    asunto: 'Firme · pedir invitación',
   },
   {
     id: 'pro',
@@ -82,6 +101,7 @@ export const PLANES: readonly Plan[] = [
       'Factura con IVA descargable, deducible',
     ],
     llamada: 'Entrar en la lista',
+    asunto: 'Firme Pro · precio fundador',
   },
   {
     id: 'despacho',
@@ -100,6 +120,7 @@ export const PLANES: readonly Plan[] = [
       'Un contacto directo para incidencias',
     ],
     llamada: 'Hablar con nosotros',
+    asunto: 'Firme para un despacho',
   },
 ] as const;
 
@@ -144,6 +165,11 @@ export const PREGUNTAS: readonly Pregunta[] = [
     pregunta: '¿Puedo descargar el PDF oficial?',
     respuesta:
       'Sí, y lo abres tú en poderjudicial.es con tu propia sesión: Firme te lleva hasta él en dos pasos. No descargamos documentos desde nuestro servidor. El CGPJ protege sus PDF con un control antidescargas que salta siempre que la petición sale de un centro de datos, y no lo esquivamos: lo detectamos y te llevamos por la vía oficial.',
+  },
+  {
+    pregunta: '¿Puedo buscar dentro del texto de una sentencia?',
+    respuesta:
+      'A veces, y conviene decirlo claro. Firme sabe abrir el PDF oficial y localizar las apariciones exactas de tus términos con su número de página, pero para eso necesita el documento, y ese mismo control antidescargas del CGPJ bloquea la petición cuando sale de un servidor. En la práctica, hoy casi siempre te dirá que no ha podido y te llevará al documento en poderjudicial.es. Lo que sí tienes siempre en cada resultado es el recorte literal que devuelve el propio CENDOJ, con tus términos resaltados. Preferimos que sobre honestidad y falte funcionalidad que al revés.',
   },
   {
     pregunta: '¿Guardáis mis búsquedas?',

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { EJEMPLOS, enlaceEjemplo } from '../lib/ejemplos';
-import { FUNDADOR, MARCA, PLANES, PREGUNTAS } from '../lib/marca';
+import { FUNDADOR, MARCA, PLANES, PREGUNTAS, enlaceContacto } from '../lib/marca';
 import { JURISDICCIONES } from '../lib/cendoj/catalogos';
 import { RUTAS, enlaceBuscador } from '../lib/rutas';
 
@@ -77,6 +77,23 @@ describe('marca y planes', () => {
     for (const p of PREGUNTAS) {
       expect(p.respuesta.length, `«${p.pregunta}» se ha quedado sin respuesta`).toBeGreaterThan(40);
     }
+  });
+
+  it('da a cada plan un destino de contacto que existe', () => {
+    // El fallo que esto evita: un botón que dice «Pedir invitación» y lleva al
+    // buscador. Prometía algo que no ocurría.
+    for (const p of PLANES) {
+      expect(p.asunto.trim(), `el plan ${p.nombre} no tiene asunto`).not.toBe('');
+      const enlace = enlaceContacto(p.asunto);
+      expect(enlace.startsWith(`mailto:${MARCA.correo}?subject=`)).toBe(true);
+      expect(enlace).not.toContain(' ');
+    }
+  });
+
+  it('no usa un correo de un dominio que todavía no existe', () => {
+    // firme.legal no está comprado: cualquier dirección ahí sería un buzón muerto.
+    expect(MARCA.correo).toMatch(/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i);
+    expect(MARCA.correo.endsWith('@firme.legal')).toBe(false);
   });
 
   it('tiene nombre y promesa', () => {

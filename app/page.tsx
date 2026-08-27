@@ -12,7 +12,7 @@ import {
   IconoLupa,
   IconoSello,
 } from '@/components/Iconos';
-import { FUNDADOR, MARCA, PLANES, PREGUNTAS, urlBase } from '@/lib/marca';
+import { FUNDADOR, MARCA, PLANES, PREGUNTAS, enlaceContacto, urlBase } from '@/lib/marca';
 import { EJEMPLOS, enlaceEjemplo } from '@/lib/ejemplos';
 import { RUTAS } from '@/lib/rutas';
 
@@ -220,13 +220,16 @@ export default function Portada() {
             <span className="tarjeta-icono">
               <IconoLibro tamano={20} />
             </span>
-            <h3>Saca el párrafo, no un resumen</h3>
+            <h3>Texto literal, nunca un resumen</h3>
             <p>
-              Firme localiza dentro del PDF oficial las apariciones exactas de tus términos y te las enseña con su
-              número de página. Son subcadenas literales del documento.
+              Cada resultado llega con el <strong>recorte literal</strong> que devuelve el propio CENDOJ y, cuando la
+              hay, con su ficha resumen oficial. Firme no reescribe ni sintetiza: lo que lees es lo que contestó el
+              buscador del CGPJ, con tus términos resaltados.
             </p>
             <p className="tarjeta-extra">
-              Si tus términos no aparecen en el texto, lo dice. Nunca rellena el hueco con una paráfrasis.
+              Buscar dentro del PDF —apariciones exactas con su número de página— depende de que el CGPJ deje pasar el
+              documento. Desde un servidor casi nunca lo hace, y entonces Firme lo dice y te lleva al original en vez
+              de inventarse el párrafo.
             </p>
           </article>
 
@@ -267,7 +270,7 @@ export default function Portada() {
             <ul>
               <li>Consultar CENDOJ en directo, en cada búsqueda</li>
               <li>Verificar por ECLI y enseñar la respuesta textual</li>
-              <li>Extraer fragmentos literales con su página</li>
+              <li>Mostrar el recorte literal que devuelve CENDOJ, con tus términos resaltados</li>
               <li>Componer la cita con los campos que CENDOJ devolvió</li>
               <li>Ordenar los resultados explicando por qué</li>
               <li>Avisar del techo de 200 documentos por consulta del CGPJ</li>
@@ -326,9 +329,9 @@ export default function Portada() {
                   <li key={linea}>{linea}</li>
                 ))}
               </ul>
-              <Link className={plan.destacado ? 'btn-principal' : 'btn-secundario'} href={RUTAS.buscador}>
+              <a className={plan.destacado ? 'btn-principal' : 'btn-secundario'} href={enlaceContacto(plan.asunto)}>
                 {plan.llamada}
-              </Link>
+              </a>
             </article>
           ))}
         </div>

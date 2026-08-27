@@ -3,20 +3,49 @@
   "framework": "nextjs",
   "buildCommand": "npm run build",
   "installCommand": "npm install",
-  "regions": ["cdg1"],
+  "regions": [
+    "cdg1"
+  ],
   "functions": {
-    "app/api/texto/route.ts": { "maxDuration": 60 },
-    "app/api/documento/route.ts": { "maxDuration": 30 },
-    "app/api/buscar/route.ts": { "maxDuration": 30 },
-    "app/api/verificar/route.ts": { "maxDuration": 30 }
+    "app/api/texto/route.ts": {
+      "maxDuration": 60
+    },
+    "app/api/documento/route.ts": {
+      "maxDuration": 30
+    },
+    "app/api/buscar/route.ts": {
+      "maxDuration": 30
+    },
+    "app/api/verificar/route.ts": {
+      "maxDuration": 30
+    }
   },
   "headers": [
     {
       "source": "/api/(.*)",
       "headers": [
-        { "key": "Cache-Control", "value": "no-store" },
-        { "key": "X-Fuente-Datos", "value": "CENDOJ - Consejo General del Poder Judicial" }
+        {
+          "key": "Cache-Control",
+          "value": "no-store"
+        },
+        {
+          "key": "X-Fuente-Datos",
+          "value": "CENDOJ - Consejo General del Poder Judicial"
+        }
       ]
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/:ruta*",
+      "has": [
+        {
+          "type": "host",
+          "value": "app-jurisprudencia.vercel.app"
+        }
+      ],
+      "destination": "https://firme-legal.vercel.app/:ruta*",
+      "permanent": false
     }
   ]
 }
