@@ -10,6 +10,18 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 /**
+ * ¿Está disponible el traductor?
+ *
+ * El cliente lo pregunta al cargar la página. Existe para que la caja de
+ * preguntas **no llegue a aparecer** cuando no puede funcionar, en vez de
+ * aparecer, aceptar una pregunta y desvanecerse al pulsar. No consume nada: no
+ * llama al modelo, solo mira si hay clave.
+ */
+export function GET(): NextResponse {
+  return NextResponse.json({ ok: true, disponible: hayTraductor(), proveedor: proveedor() });
+}
+
+/**
  * Traduce una pregunta en lenguaje natural a filtros del formulario del CGPJ.
  *
  * Devuelve los filtros, no resultados: quien busca sigue siendo CENDOJ. El

@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { anotarUso, cabeceras, cupo, usarPro } from '@/lib/pro';
 import { IconoAviso, IconoLupa } from '@/components/Iconos';
 import { RUTAS } from '@/lib/rutas';
@@ -14,8 +14,13 @@ import { RUTAS } from '@/lib/rutas';
  * caja negra en una herramienta. El usuario ve qué ha entendido, lo corrige si
  * hace falta y decide si busca. La búsqueda la sigue haciendo CENDOJ.
  *
- * Si el servidor no tiene traductor configurado, el componente se calla y el
- * buscador funciona igual que siempre.
+ * Regla que este componente tuvo que aprender a golpes: **nunca desaparece
+ * después de que alguien haya escrito algo.** La primera versión se ocultaba a
+ * sí misma si el servidor contestaba que la función no estaba disponible, así
+ * que quien escribía una pregunta y pulsaba veía cómo la caja se esfumaba sin
+ * decir nada. Ahora la disponibilidad se pregunta **al cargar**: si el
+ * traductor no está, la caja no llega a aparecer; y si falla cuando ya se está
+ * usando, se queda donde está y explica qué ha pasado.
  */
 
 export type FiltrosTraducidos = {
@@ -29,49 +34,89 @@ export type FiltrosTraducidos = {
   razonamiento: string;
 };
 
+/** Si tarda más que esto, algo va mal: lo normal son menos de tres segundos. */
+const ESPERA_MAXIMA_MS = 45_000;
+
+type Disponibilidad = 'comprobando' | 'disponible' | 'no-disponible';
+
 export function PreguntaNatural({ alAplicar }: { alAplicar: (f: FiltrosTraducidos) => void }) {
   const { pro, esPro } = usarPro();
+  const [disponible, setDisponible] = useState<Disponibilidad>('comprobando');
   const [pregunta, setPregunta] = useState('');
   const [pensando, setPensando] = useState(false);
   const [filtros, setFiltros] = useState<FiltrosTraducidos | null>(null);
   const [fallo, setFallo] = useState<string | null>(null);
-  const [desactivado, setDesactivado] = useState(false);
 
   const cuota = cupo('preguntasAlMes', esPro);
+
+  useEffect(() => {
+    let vivo = true;
+    fetch('/api/traducir')
+      .then((r) => r.json() as Promise<{ disponible?: boolean }>)
+      .then((d) => {
+        if (vivo) setDisponible(d.disponible ? 'disponible' : 'no-disponible');
+      })
+      .catch(() => {
+        // Si ni siquiera se puede preguntar, se asume que no está: mejor no
+        // enseñar una caja que quizá no funcione.
+        if (vivo) setDisponible('no-disponible');
+      });
+    return () => {
+      vivo = false;
+    };
+  }, []);
 
   async function preguntar(e: React.FormEvent) {
     e.preventDefault();
     if (pregunta.trim().length < 5) return;
+
     setPensando(true);
     setFallo(null);
     setFiltros(null);
+
+    const corte = new AbortController();
+    const reloj = window.setTimeout(() => corte.abort(), ESPERA_MAXIMA_MS);
+
     try {
       const res = await fetch('/api/traducir', {
         method: 'POST',
         headers: cabeceras({ 'content-type': 'application/json' }),
         body: JSON.stringify({ pregunta }),
+        signal: corte.signal,
       });
+
       const cuerpo = (await res.json()) as
         | { ok: true; filtros: FiltrosTraducidos }
-        | { ok: false; codigo: string; mensaje: string };
+        | { ok: false; codigo?: string; mensaje?: string };
 
       if (!cuerpo.ok) {
-        if (cuerpo.codigo === 'FUNCION_DESACTIVADA') setDesactivado(true);
-        setFallo(cuerpo.mensaje);
+        // Pase lo que pase, la caja se queda: el usuario ha escrito algo y
+        // merece saber por qué no ha salido.
+        setFallo(
+          cuerpo.codigo === 'FUNCION_DESACTIVADA'
+            ? 'Las preguntas en lenguaje natural no están disponibles ahora mismo en el servidor. Puedes buscar igual escribiendo los términos abajo.'
+            : (cuerpo.mensaje ??
+              'No se ha podido traducir la pregunta. Prueba a escribir los términos directamente en el buscador.'),
+        );
         return;
       }
+
       anotarUso('preguntasAlMes');
       setFiltros(cuerpo.filtros);
-    } catch {
-      setFallo('No se ha podido traducir la pregunta. Escribe los términos directamente.');
+    } catch (err) {
+      setFallo(
+        err instanceof DOMException && err.name === 'AbortError'
+          ? 'La traducción ha tardado demasiado y se ha cancelado. Vuelve a intentarlo, o escribe los términos abajo.'
+          : 'No se ha podido contactar con el servidor. Comprueba tu conexión y vuelve a intentarlo.',
+      );
     } finally {
+      window.clearTimeout(reloj);
       setPensando(false);
     }
   }
 
-  // Si el servidor no ofrece traductor, esto desaparece: mejor no enseñar una
-  // caja que no va a hacer nada.
-  if (desactivado) return null;
+  // Solo se oculta antes de que nadie haya interactuado: nunca después.
+  if (disponible !== 'disponible') return null;
 
   const sinCupo = !esPro && !cuota.permitido;
 
@@ -86,7 +131,7 @@ export function PreguntaNatural({ alAplicar }: { alAplicar: (f: FiltrosTraducido
             value={pregunta}
             onChange={(e) => setPregunta(e.target.value)}
             placeholder="Sentencias del Supremo de los últimos tres años sobre despido en incapacidad temporal"
-            disabled={sinCupo}
+            disabled={sinCupo || pensando}
           />
           <button className="btn-principal" type="submit" disabled={pensando || sinCupo || pregunta.trim().length < 5}>
             <IconoLupa tamano={16} />
@@ -95,29 +140,40 @@ export function PreguntaNatural({ alAplicar }: { alAplicar: (f: FiltrosTraducido
         </div>
       </form>
 
-      <p className="pista">
-        La IA solo rellena el formulario del CGPJ y te lo enseña para que lo corrijas. No busca, no resume y no
-        interpreta: eso lo sigue haciendo CENDOJ.
-        {!esPro && pro.estado !== 'cargando' ? (
-          <>
-            {' '}
-            {sinCupo ? (
-              <>
-                Has gastado tus {cuota.tope} preguntas del mes. <Link href={RUTAS.pro}>Con Pro no se cuentan.</Link>
-              </>
-            ) : (
-              <>
-                Te quedan <strong>{cuota.restantes}</strong> de {cuota.tope} este mes.
-              </>
-            )}
-          </>
-        ) : null}
-      </p>
+      {pensando ? (
+        <p className="pista" role="status" aria-live="polite">
+          Convirtiendo tu pregunta en filtros del formulario del CGPJ. Suele tardar dos o tres segundos.
+        </p>
+      ) : (
+        <p className="pista">
+          La IA solo rellena el formulario del CGPJ y te lo enseña para que lo corrijas. No busca, no resume y no
+          interpreta: eso lo sigue haciendo CENDOJ.
+          {!esPro && pro.estado !== 'cargando' ? (
+            <>
+              {' '}
+              {sinCupo ? (
+                <>
+                  Has gastado tus {cuota.tope} preguntas del mes. <Link href={RUTAS.pro}>Con Pro no se cuentan.</Link>
+                </>
+              ) : (
+                <>
+                  Te quedan <strong>{cuota.restantes}</strong> de {cuota.tope} este mes.
+                </>
+              )}
+            </>
+          ) : null}
+        </p>
+      )}
 
       {fallo ? (
-        <p className="aviso aviso-atencion">
+        <p className="aviso aviso-atencion" role="alert">
           <IconoAviso tamano={17} />
-          <span>{fallo}</span>
+          <span>
+            {fallo}{' '}
+            <button className="btn-texto" type="button" onClick={() => setFallo(null)}>
+              Entendido
+            </button>
+          </span>
         </p>
       ) : null}
 
