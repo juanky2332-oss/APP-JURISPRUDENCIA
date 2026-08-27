@@ -17,7 +17,12 @@ import { createHmac, timingSafeEqual } from 'node:crypto';
  *     contraseña compartida, y se mitiga igual: la clave lleva el correo del
  *     titular escrito dentro y visible en su panel.
  *
- * Formato: `FIRME-PRO.<carga en base64url>.<firma en base64url>`
+ * Formato: `FUNDALEX-PRO.<carga en base64url>.<firma en base64url>`
+ *
+ * El prefijo antiguo `FIRME-PRO` se sigue aceptando al comprobar, aunque ya no
+ * se emita: el producto se llamó Firme antes de llamarse FundaLex, y una clave
+ * ya entregada a un cliente no puede dejar de funcionar porque nosotros
+ * cambiemos de nombre. Lo mismo vale para el secreto del entorno.
  */
 
 export type Plan = 'gratis' | 'pro';
@@ -41,10 +46,14 @@ export type ResultadoLicencia =
   | { valida: true; carga: CargaLicencia; diasRestantes: number }
   | { valida: false; motivo: 'formato' | 'firma' | 'caducada' | 'sin-secreto'; detalle: string };
 
-const PREFIJO = 'FIRME-PRO';
+const PREFIJO = 'FUNDALEX-PRO';
+/** Prefijos que se aceptan al comprobar. El primero es el que se emite. */
+const PREFIJOS_VALIDOS = [PREFIJO, 'FIRME-PRO'] as const;
 
 function secreto(): string | null {
-  const s = process.env['FIRME_SECRETO_LICENCIAS'];
+  // Se admite el nombre antiguo para no obligar a tocar el entorno en el mismo
+  // momento en que se despliega el cambio de nombre.
+  const s = process.env['FUNDALEX_SECRETO_LICENCIAS'] ?? process.env['FIRME_SECRETO_LICENCIAS'];
   return s && s.length >= 16 ? s : null;
 }
 
@@ -57,8 +66,12 @@ function deBase64Url(s: string): Buffer {
   return Buffer.from(s.replace(/-/g, '+').replace(/_/g, '/') + relleno, 'base64');
 }
 
-function firmar(cargaCodificada: string, clave: string): string {
-  return aBase64Url(createHmac('sha256', clave).update(`${PREFIJO}.${cargaCodificada}`).digest());
+/**
+ * La firma incluye el prefijo, así que una clave emitida como `FIRME-PRO` solo
+ * valida si se recalcula con ese mismo prefijo. Por eso se pasa explícito.
+ */
+function firmar(cargaCodificada: string, clave: string, prefijo: string): string {
+  return aBase64Url(createHmac('sha256', clave).update(`${prefijo}.${cargaCodificada}`).digest());
 }
 
 /** Emite una licencia. Solo se usa desde el script de emisión, nunca en una petición. */
@@ -66,11 +79,11 @@ export function crearLicencia(carga: CargaLicencia): string {
   const clave = secreto();
   if (!clave) {
     throw new Error(
-      'Falta FIRME_SECRETO_LICENCIAS (mínimo 16 caracteres). Sin secreto no se pueden emitir licencias.',
+      'Falta FUNDALEX_SECRETO_LICENCIAS (mínimo 16 caracteres). Sin secreto no se pueden emitir licencias.',
     );
   }
   const cargaCodificada = aBase64Url(Buffer.from(JSON.stringify(carga), 'utf8'));
-  return `${PREFIJO}.${cargaCodificada}.${firmar(cargaCodificada, clave)}`;
+  return `${PREFIJO}.${cargaCodificada}.${firmar(cargaCodificada, clave, PREFIJO)}`;
 }
 
 /**
@@ -83,18 +96,19 @@ export function verificarLicencia(bruta: string | null | undefined, ahora: Date 
     return {
       valida: false,
       motivo: 'sin-secreto',
-      detalle: 'El servidor no tiene configurado FIRME_SECRETO_LICENCIAS, así que no puede comprobar licencias.',
+      detalle: 'El servidor no tiene configurado FUNDALEX_SECRETO_LICENCIAS, así que no puede comprobar licencias.',
     };
   }
 
   const texto = (bruta ?? '').trim();
   const partes = texto.split('.');
-  if (partes.length !== 3 || partes[0] !== PREFIJO || !partes[1] || !partes[2]) {
-    return { valida: false, motivo: 'formato', detalle: 'La clave no tiene el formato de una licencia de Firme.' };
+  const prefijo = PREFIJOS_VALIDOS.find((p) => p === partes[0]);
+  if (partes.length !== 3 || !prefijo || !partes[1] || !partes[2]) {
+    return { valida: false, motivo: 'formato', detalle: 'La clave no tiene el formato de una licencia de FundaLex.' };
   }
 
   const [, cargaCodificada, firmaRecibida] = partes as [string, string, string];
-  const esperada = firmar(cargaCodificada, clave);
+  const esperada = firmar(cargaCodificada, clave, prefijo);
 
   // Comparación en tiempo constante: evita deducir la firma midiendo respuestas.
   const a = Buffer.from(firmaRecibida);
@@ -132,5 +146,5 @@ export function ocultarClave(clave: string): string {
   const partes = clave.trim().split('.');
   if (partes.length !== 3) return '(clave no válida)';
   const firma = partes[2] ?? '';
-  return `${PREFIJO}.…${firma.slice(-6)}`;
+  return `${partes[0]}.…${firma.slice(-6)}`;
 }

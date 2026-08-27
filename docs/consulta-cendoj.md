@@ -3,7 +3,7 @@
 Escrito listo para enviar al Centro de Documentación Judicial. **No es una solicitud de licencia
 de reutilización**, y esa distinción es deliberada: pedir una licencia sería declararse
 reutilizador, categoría que implica el suministro de ficheros estructurados y que no corresponde a
-lo que hace Firme. Lo que se pide aquí es que confirmen si este uso concreto requiere autorización
+lo que hace FundaLex. Lo que se pide aquí es que confirmen si este uso concreto requiere autorización
 y, en su caso, bajo qué condiciones.
 
 ## Por qué merece la pena enviarlo
@@ -44,7 +44,7 @@ correo electrónico [CORREO], expone y consulta lo siguiente.
 
 **Primero. Objeto de la consulta.**
 
-He desarrollado una herramienta web, denominada Firme, que ofrece una interfaz de consulta sobre el
+He desarrollado una herramienta web, denominada FundaLex, que ofrece una interfaz de consulta sobre el
 buscador público de jurisprudencia de ese Centro, accesible en `poderjudicial.es/search/indexAN.jsp`.
 
 El motivo de este escrito es conocer, antes de dar cualquier paso adicional, si el uso que se

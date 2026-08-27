@@ -1,6 +1,7 @@
 'use client';
 
 import type { Resolucion } from './tipos';
+import { escribir, leer } from './almacen';
 
 /**
  * Carpetas de asunto.
@@ -17,7 +18,7 @@ import type { Resolucion } from './tipos';
  * preguntando otra vez a la fuente.
  */
 
-const CLAVE = 'firme:carpetas';
+const CLAVE = 'fundalex:carpetas';
 
 /** Lo que se guarda de una resolución: su ficha, no su contenido. */
 export type FichaGuardada = {
@@ -45,9 +46,8 @@ export type Carpeta = {
 };
 
 function leerTodo(): Carpeta[] {
-  if (typeof window === 'undefined') return [];
   try {
-    const bruto = window.localStorage.getItem(CLAVE);
+    const bruto = leer(CLAVE);
     const datos = bruto ? (JSON.parse(bruto) as unknown) : [];
     return Array.isArray(datos) ? (datos as Carpeta[]) : [];
   } catch {
@@ -56,11 +56,7 @@ function leerTodo(): Carpeta[] {
 }
 
 function guardarTodo(carpetas: Carpeta[]): void {
-  try {
-    window.localStorage.setItem(CLAVE, JSON.stringify(carpetas));
-  } catch {
-    /* si el navegador no deja escribir, la sesión sigue pero no persiste */
-  }
+  escribir(CLAVE, JSON.stringify(carpetas));
 }
 
 export function listarCarpetas(): Carpeta[] {

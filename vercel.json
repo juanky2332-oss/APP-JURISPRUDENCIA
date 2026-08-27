@@ -59,7 +59,18 @@
           "value": "app-jurisprudencia.vercel.app"
         }
       ],
-      "destination": "https://firme-legal.vercel.app/:ruta*",
+      "destination": "https://fundalex.vercel.app/:ruta*",
+      "permanent": false
+    },
+    {
+      "source": "/:ruta*",
+      "has": [
+        {
+          "type": "host",
+          "value": "firme-legal.vercel.app"
+        }
+      ],
+      "destination": "https://fundalex.vercel.app/:ruta*",
       "permanent": false
     }
   ]

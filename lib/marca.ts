@@ -8,10 +8,10 @@
  */
 
 export const MARCA = {
-  nombre: 'Firme',
-  claim: 'Jurisprudencia firme y reutilizable',
+  nombre: 'FundaLex',
+  claim: 'Del caso al fundamento, con respaldo oficial',
   descripcion:
-    'Encuentra resoluciones recurrentes, ECLI y citas que suelen sostener escritos. Todo sale del buscador oficial del CENDOJ, en directo, y se puede comprobar una por una.',
+    'Del caso al fundamento: encuentra las resoluciones que sostienen tu escrito, con su ECLI y su respaldo oficial. Todo sale del buscador del CENDOJ, en directo, y se puede comprobar una por una.',
   descripcionCorta:
     'Buscador de jurisprudencia española sobre la fuente oficial del CENDOJ, con verificación por ECLI y fragmentos literales.',
   /**
@@ -19,11 +19,11 @@ export const MARCA = {
    * propósito: enseñar una dirección que no resuelve sería el mismo tipo de
    * dato verosímil y falso que esta aplicación existe para evitar.
    */
-  dominio: 'firme.legal',
+  dominio: 'fundalex.legal',
   /** Correo de contacto real. Se usa en los botones y en las páginas legales. */
   correo: 'juancarlos@flownexion.com',
   /** Titular del sitio, para las páginas legales. */
-  titular: 'Firme',
+  titular: 'FundaLex',
 } as const;
 
 /** Base absoluta del sitio: en Vercel la da la plataforma, en local es localhost. */
@@ -80,7 +80,7 @@ export const PLANES: readonly Plan[] = [
       '3 verificaciones de escrito al mes',
     ],
     llamada: 'Pedir invitación',
-    asunto: 'Firme · pedir invitación',
+    asunto: 'FundaLex · pedir invitación',
   },
   {
     id: 'pro',
@@ -101,7 +101,7 @@ export const PLANES: readonly Plan[] = [
       'Factura con IVA descargable, deducible',
     ],
     llamada: 'Entrar en la lista',
-    asunto: 'Firme Pro · precio fundador',
+    asunto: 'FundaLex Pro · precio fundador',
   },
   {
     id: 'despacho',
@@ -120,7 +120,7 @@ export const PLANES: readonly Plan[] = [
       'Un contacto directo para incidencias',
     ],
     llamada: 'Hablar con nosotros',
-    asunto: 'Firme para un despacho',
+    asunto: 'FundaLex para un despacho',
   },
 ] as const;
 
@@ -139,7 +139,7 @@ export const PREGUNTAS: readonly Pregunta[] = [
   {
     pregunta: '¿De dónde sale la jurisprudencia?',
     respuesta:
-      'De un único sitio: el buscador oficial del CENDOJ, el Centro de Documentación Judicial del Consejo General del Poder Judicial, en poderjudicial.es. No hay base de datos propia, no hay copias y no hay fuentes de terceros. Si CENDOJ no lo devuelve, Firme no lo enseña.',
+      'De un único sitio: el buscador oficial del CENDOJ, el Centro de Documentación Judicial del Consejo General del Poder Judicial, en poderjudicial.es. No hay base de datos propia, no hay copias y no hay fuentes de terceros. Si CENDOJ no lo devuelve, FundaLex no lo enseña.',
   },
   {
     pregunta: '¿Qué significa que una resolución esté verificada?',
@@ -164,12 +164,12 @@ export const PREGUNTAS: readonly Pregunta[] = [
   {
     pregunta: '¿Puedo descargar el PDF oficial?',
     respuesta:
-      'Sí, y lo abres tú en poderjudicial.es con tu propia sesión: Firme te lleva hasta él en dos pasos. No descargamos documentos desde nuestro servidor. El CGPJ protege sus PDF con un control antidescargas que salta siempre que la petición sale de un centro de datos, y no lo esquivamos: lo detectamos y te llevamos por la vía oficial.',
+      'Sí, y lo abres tú en poderjudicial.es con tu propia sesión: FundaLex te lleva hasta él en dos pasos. No descargamos documentos desde nuestro servidor. El CGPJ protege sus PDF con un control antidescargas que salta siempre que la petición sale de un centro de datos, y no lo esquivamos: lo detectamos y te llevamos por la vía oficial.',
   },
   {
     pregunta: '¿Puedo buscar dentro del texto de una sentencia?',
     respuesta:
-      'A veces, y conviene decirlo claro. Firme sabe abrir el PDF oficial y localizar las apariciones exactas de tus términos con su número de página, pero para eso necesita el documento, y ese mismo control antidescargas del CGPJ bloquea la petición cuando sale de un servidor. En la práctica, hoy casi siempre te dirá que no ha podido y te llevará al documento en poderjudicial.es. Lo que sí tienes siempre en cada resultado es el recorte literal que devuelve el propio CENDOJ, con tus términos resaltados. Preferimos que sobre honestidad y falte funcionalidad que al revés.',
+      'A veces, y conviene decirlo claro. FundaLex sabe abrir el PDF oficial y localizar las apariciones exactas de tus términos con su número de página, pero para eso necesita el documento, y ese mismo control antidescargas del CGPJ bloquea la petición cuando sale de un servidor. En la práctica, hoy casi siempre te dirá que no ha podido y te llevará al documento en poderjudicial.es. Lo que sí tienes siempre en cada resultado es el recorte literal que devuelve el propio CENDOJ, con tus términos resaltados. Preferimos que sobre honestidad y falte funcionalidad que al revés.',
   },
   {
     pregunta: '¿Guardáis mis búsquedas?',
@@ -179,6 +179,6 @@ export const PREGUNTAS: readonly Pregunta[] = [
   {
     pregunta: '¿Sirve para el turno de oficio y para despachos pequeños?',
     respuesta:
-      'Es justo para quien está pensado. Los repertorios de pago cuestan varios cientos de euros al año y están fuera del alcance de un despacho de una o dos personas. Firme cuesta menos que una comida y da acceso a la misma fuente oficial que usa el juez.',
+      'Es justo para quien está pensado. Los repertorios de pago cuestan varios cientos de euros al año y están fuera del alcance de un despacho de una o dos personas. FundaLex cuesta menos que una comida y da acceso a la misma fuente oficial que usa el juez.',
   },
 ] as const;

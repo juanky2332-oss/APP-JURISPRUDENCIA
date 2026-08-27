@@ -30,7 +30,7 @@ export async function POST(req: Request): Promise<NextResponse> {
   const r = verificarLicencia(clave);
   if (!r.valida) {
     const mensajes: Record<string, string> = {
-      formato: 'Esa clave no tiene el formato de una licencia de Firme. Cópiala entera, desde «FIRME-PRO».',
+      formato: 'Esa clave no tiene el formato de una licencia de FundaLex. Cópiala entera, desde «FUNDALEX-PRO».',
       firma: 'La clave no es válida. Comprueba que la has copiado completa y sin espacios.',
       caducada: r.detalle,
       'sin-secreto': 'El servidor no puede comprobar licencias ahora mismo. Escríbenos y lo miramos.',

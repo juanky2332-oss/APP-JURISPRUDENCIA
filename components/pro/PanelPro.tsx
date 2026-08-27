@@ -15,7 +15,7 @@ const HERRAMIENTAS = [
     titulo: 'Verificar un escrito',
     icono: IconoSello,
     descripcion:
-      'Pega una demanda, un recurso o el escrito del contrario. Firme localiza las citas y pregunta por cada una a CENDOJ.',
+      'Pega una demanda, un recurso o el escrito del contrario. FundaLex localiza las citas y pregunta por cada una a CENDOJ.',
     gratis: `${LIMITES.gratis.escritosAlMes} escritos al mes, hasta ${LIMITES.gratis.citasPorEscrito} citas cada uno`,
     pro: `Sin límite de escritos, hasta ${LIMITES.pro.citasPorEscrito} citas por escrito`,
   },
@@ -92,18 +92,18 @@ export function PanelPro() {
         <h1>
           {pro.estado === 'pro' ? (
             <>
-              Firme <em>Pro</em>, activo
+              FundaLex <em>Pro</em>, activo
             </>
           ) : (
             <>
-              Activa <em>Firme Pro</em>
+              Activa <em>FundaLex Pro</em>
             </>
           )}
         </h1>
         <p className="pro-lede">
           {pro.estado === 'pro'
             ? 'Tu licencia está comprobada en este navegador. Las herramientas de abajo ya funcionan sin cuota.'
-            : 'Firme funciona sin cuenta y la jurisprudencia es gratis. Pro añade el trabajo de alrededor: verificar escritos sin contar, el BOE de tu materia, carpetas de asunto y alertas.'}
+            : 'FundaLex funciona sin cuenta y la jurisprudencia es gratis. Pro añade el trabajo de alrededor: verificar escritos sin contar, el BOE de tu materia, carpetas de asunto y alertas.'}
         </p>
       </header>
 
@@ -146,7 +146,7 @@ export function PanelPro() {
           </table>
 
           <p className="nota-fuente">
-            La licencia se guarda solo en este navegador. Si usas Firme en otro equipo, vuelve a pegar la misma clave
+            La licencia se guarda solo en este navegador. Si usas FundaLex en otro equipo, vuelve a pegar la misma clave
             allí: es tuya y vale en los dispositivos que uses tú.
           </p>
 
@@ -154,7 +154,7 @@ export function PanelPro() {
             <button type="button" onClick={desactivar}>
               Quitar la licencia de este navegador
             </button>
-            <a className="btn-texto" href={enlaceContacto('Firme Pro · renovación')}>
+            <a className="btn-texto" href={enlaceContacto('FundaLex Pro · renovación')}>
               Renovar o cambiar de plan
             </a>
           </div>
@@ -169,7 +169,7 @@ export function PanelPro() {
               type="text"
               value={clave}
               onChange={(e) => setClave(e.target.value)}
-              placeholder="FIRME-PRO.…"
+              placeholder="FUNDALEX-PRO.…"
               autoComplete="off"
               spellCheck={false}
             />
@@ -191,7 +191,7 @@ export function PanelPro() {
               Pro cuesta <strong>{planPro?.precio}</strong> {planPro?.periodo}. Escríbenos y te mandamos la clave y la
               factura. Mientras no haya pasarela de pago, el alta la hacemos a mano y contestamos el mismo día.
             </p>
-            <a className="btn-principal" href={enlaceContacto('Firme Pro · quiero una licencia')}>
+            <a className="btn-principal" href={enlaceContacto('FundaLex Pro · quiero una licencia')}>
               Pedir una licencia
             </a>
             <p className="pista">
@@ -255,7 +255,7 @@ export function PanelPro() {
       </section>
 
       <p className="nota-fuente" style={{ maxWidth: '80ch' }}>
-        <Emblema tamano={14} /> La jurisprudencia del CENDOJ es gratuita en Firme y lo seguirá siendo. Lo que Pro paga
+        <Emblema tamano={14} /> La jurisprudencia del CENDOJ es gratuita en FundaLex y lo seguirá siendo. Lo que Pro paga
         es el trabajo de alrededor, no el acceso a información pública.
       </p>
     </div>

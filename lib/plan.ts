@@ -9,7 +9,7 @@ import type { Plan } from './limites';
  * El cliente la guarda en su propio navegador y la adjunta cuando la tiene.
  */
 
-export const CABECERA_LICENCIA = 'x-firme-licencia';
+export const CABECERA_LICENCIA = 'x-fundalex-licencia';
 
 export type Contexto = {
   plan: Plan;

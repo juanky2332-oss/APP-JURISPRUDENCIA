@@ -10,7 +10,7 @@ import { urlCanonicaSiProcede } from '../lib/despliegue';
 import type { Carpeta } from '../lib/carpetas';
 
 beforeAll(() => {
-  process.env['FIRME_SECRETO_LICENCIAS'] = 'secreto-de-pruebas-suficientemente-largo';
+  process.env['FUNDALEX_SECRETO_LICENCIAS'] = 'secreto-de-pruebas-suficientemente-largo';
 });
 
 function carga(cambios: Partial<CargaLicencia> = {}): CargaLicencia {
@@ -65,14 +65,33 @@ describe('licencias Pro', () => {
   });
 
   it('rechaza basura y cadenas vacías sin lanzar', () => {
-    for (const mala of ['', '   ', 'FIRME-PRO', 'FIRME-PRO.a.b', 'otra-cosa', 'a.b.c']) {
+    for (const mala of ['', '   ', 'FUNDALEX-PRO', 'FUNDALEX-PRO.a.b', 'otra-cosa', 'a.b.c']) {
       expect(verificarLicencia(mala).valida).toBe(false);
     }
   });
 
+  it('sigue aceptando las claves emitidas cuando el producto se llamaba Firme', () => {
+    // El nombre cambió a mitad de camino. Una clave ya entregada a un cliente no
+    // puede dejar de funcionar porque nosotros cambiemos de marca.
+    const { createHmac } = require('node:crypto') as typeof import('node:crypto');
+    const b64 = (b: Buffer) => b.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    const cuerpo = b64(Buffer.from(JSON.stringify(carga()), 'utf8'));
+    const firma = b64(
+      createHmac('sha256', process.env['FUNDALEX_SECRETO_LICENCIAS'] as string)
+        .update(`FIRME-PRO.${cuerpo}`)
+        .digest(),
+    );
+    const r = verificarLicencia(`FIRME-PRO.${cuerpo}.${firma}`);
+    expect(r.valida).toBe(true);
+  });
+
+  it('emite ya con el prefijo nuevo', () => {
+    expect(crearLicencia(carga()).startsWith('FUNDALEX-PRO.')).toBe(true);
+  });
+
   it('oculta la clave al enseñarla', () => {
     const oculta = ocultarClave(crearLicencia(carga()));
-    expect(oculta.startsWith('FIRME-PRO.…')).toBe(true);
+    expect(oculta.startsWith('FUNDALEX-PRO.…')).toBe(true);
     expect(oculta.length).toBeLessThan(30);
   });
 });
@@ -317,27 +336,27 @@ describe('saneado de los filtros que devuelve la IA', () => {
 });
 
 describe('aviso de despliegue congelado', () => {
-  const CANON = 'https://firme-legal.vercel.app';
+  const CANON = 'https://fundalex.vercel.app';
   const en = (host: string, pathname = '/buscar', search = '') => ({ host, pathname, search });
 
   it('avisa en una URL de despliegue de Vercel', () => {
     // El caso real: el portátil abría esta dirección, de dos horas antes, y la
     // caja de preguntas no existía todavía en ese código.
     expect(urlCanonicaSiProcede(en('app-jurisprudencia-b1xfq5n1u-juan-carlos-projects-9a60b692.vercel.app'), CANON))
-      .toBe('https://firme-legal.vercel.app/buscar');
+      .toBe('https://fundalex.vercel.app/buscar');
   });
 
   it('conserva la ruta y los parámetros para no perder al usuario', () => {
     expect(urlCanonicaSiProcede(en('otro-despliegue.vercel.app', '/buscar', '?q=alimentos&jurisdiccion=CIVIL'), CANON))
-      .toBe('https://firme-legal.vercel.app/buscar?q=alimentos&jurisdiccion=CIVIL');
+      .toBe('https://fundalex.vercel.app/buscar?q=alimentos&jurisdiccion=CIVIL');
   });
 
   it('no avisa en el dominio bueno', () => {
-    expect(urlCanonicaSiProcede(en('firme-legal.vercel.app'), CANON)).toBeNull();
+    expect(urlCanonicaSiProcede(en('fundalex.vercel.app'), CANON)).toBeNull();
   });
 
   it('no distingue mayúsculas en el dominio', () => {
-    expect(urlCanonicaSiProcede(en('FIRME-LEGAL.VERCEL.APP'), CANON)).toBeNull();
+    expect(urlCanonicaSiProcede(en('FUNDALEX.VERCEL.APP'), CANON)).toBeNull();
   });
 
   it('no molesta en desarrollo local', () => {

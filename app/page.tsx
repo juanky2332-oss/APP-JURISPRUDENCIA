@@ -18,8 +18,8 @@ import { RUTAS } from '@/lib/rutas';
 
 export const metadata: Metadata = {
   // Sin `title`: la portada usa el `default` del layout, que ya es
-  // «Firme — Jurisprudencia firme y reutilizable». Ponerlo aquí le aplicaría
-  // encima la plantilla «%s · Firme» y saldría el nombre repetido.
+  // «FundaLex — Del caso al fundamento, con respaldo oficial». Ponerlo aquí le aplicaría
+  // encima la plantilla «%s · FundaLex» y saldría el nombre repetido.
   description: MARCA.descripcion,
   alternates: { canonical: '/' },
   robots: { index: true, follow: true },
@@ -91,12 +91,12 @@ export default function Portada() {
           </p>
 
           <h1>
-            Jurisprudencia <em>firme</em> y reutilizable
+            Del caso al <em>fundamento</em>, con respaldo oficial
           </h1>
 
           <p className="hero-lede">
-            Encuentra resoluciones recurrentes, ECLI y citas que suelen sostener escritos. Todo sale del buscador
-            oficial del CENDOJ, en directo, y se puede comprobar una por una.
+            Encuentra las resoluciones que sostienen tu escrito, con su ECLI y su respaldo oficial. Todo sale del
+            buscador del CENDOJ, en directo, y se puede comprobar una por una.
           </p>
 
           <div className="hero-acciones">
@@ -160,7 +160,7 @@ export default function Portada() {
           <p className="antetitulo">Lo que nos separa del resto</p>
           <h2 id="t-evidencia">Una insignia sin pruebas no vale nada</h2>
           <p className="bloque-lede">
-            Cualquiera puede pintar un sello verde que ponga «verificado». Firme escribe debajo la frase de lo que pasó:
+            Cualquiera puede pintar un sello verde que ponga «verificado». FundaLex escribe debajo la frase de lo que pasó:
             qué se preguntó, qué contestó CENDOJ y a qué hora. Si no lo confirma, lo dice en rojo y no enseña nada más.
           </p>
         </div>
@@ -170,7 +170,7 @@ export default function Portada() {
             <span className="cadena-num">01</span>
             <h3>Se pregunta por el identificador</h3>
             <p>
-              Firme consulta el buscador del CGPJ por el ECLI exacto de la resolución. No por el título, no por
+              FundaLex consulta el buscador del CGPJ por el ECLI exacto de la resolución. No por el título, no por
               aproximación: por el identificador europeo único.
             </p>
           </li>
@@ -223,12 +223,12 @@ export default function Portada() {
             <h3>Texto literal, nunca un resumen</h3>
             <p>
               Cada resultado llega con el <strong>recorte literal</strong> que devuelve el propio CENDOJ y, cuando la
-              hay, con su ficha resumen oficial. Firme no reescribe ni sintetiza: lo que lees es lo que contestó el
+              hay, con su ficha resumen oficial. FundaLex no reescribe ni sintetiza: lo que lees es lo que contestó el
               buscador del CGPJ, con tus términos resaltados.
             </p>
             <p className="tarjeta-extra">
               Buscar dentro del PDF —apariciones exactas con su número de página— depende de que el CGPJ deje pasar el
-              documento. Desde un servidor casi nunca lo hace, y entonces Firme lo dice y te lleva al original en vez
+              documento. Desde un servidor casi nunca lo hace, y entonces FundaLex lo dice y te lleva al original en vez
               de inventarse el párrafo.
             </p>
           </article>
@@ -240,7 +240,7 @@ export default function Portada() {
             <h3>Te lleva al original por la vía oficial</h3>
             <p>
               El CGPJ protege sus PDF con un control antidescargas que salta siempre que la petición sale de un centro
-              de datos. Firme no lo esquiva: lo detecta, te lo explica y abre el documento en poderjudicial.es con tu
+              de datos. FundaLex no lo esquiva: lo detecta, te lo explica y abre el documento en poderjudicial.es con tu
               sesión.
             </p>
             <p className="tarjeta-extra">
@@ -254,7 +254,7 @@ export default function Portada() {
       <section className="bloque" aria-labelledby="t-limites">
         <div className="bloque-cabecera">
           <p className="antetitulo">Los límites, por escrito</p>
-          <h2 id="t-limites">Lo que Firme no hace, y no va a hacer</h2>
+          <h2 id="t-limites">Lo que FundaLex no hace, y no va a hacer</h2>
           <p className="bloque-lede">
             Un buscador de jurisprudencia que se inventa cosas es peor que no tener buscador. Estas renuncias no son
             carencias pendientes de resolver: son la decisión de producto.
@@ -294,7 +294,7 @@ export default function Portada() {
         </div>
 
         <p className="nota-fuente" style={{ marginTop: 22, maxWidth: '78ch' }}>
-          Cuando un dato no está, Firme escribe «dato no disponible». Es una respuesta correcta, y bastante más útil que
+          Cuando un dato no está, FundaLex escribe «dato no disponible». Es una respuesta correcta, y bastante más útil que
           un dato verosímil.
         </p>
       </section>

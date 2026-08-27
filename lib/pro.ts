@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { LIMITES } from './limites';
+import { borrar, escribir, leer } from './almacen';
 
 /**
  * Estado Pro en el navegador.
@@ -18,8 +19,8 @@ import { LIMITES } from './limites';
  * exigiría una base de datos, y este proyecto ha decidido no tenerla.
  */
 
-const CLAVE_LICENCIA = 'firme:licencia';
-const CLAVE_CUOTAS = 'firme:cuotas';
+const CLAVE_LICENCIA = 'fundalex:licencia';
+const CLAVE_CUOTAS = 'fundalex:cuotas';
 
 export type DatosPro = {
   titular: string;
@@ -38,33 +39,21 @@ export type EstadoPro =
   | { estado: 'rechazada'; mensaje: string };
 
 function leerClave(): string | null {
-  try {
-    return window.localStorage.getItem(CLAVE_LICENCIA);
-  } catch {
-    return null;
-  }
+  return leer(CLAVE_LICENCIA);
 }
 
 export function guardarClave(clave: string): void {
-  try {
-    window.localStorage.setItem(CLAVE_LICENCIA, clave.trim());
-  } catch {
-    /* en navegación privada se pierde al cerrar; el usuario la vuelve a pegar */
-  }
+  escribir(CLAVE_LICENCIA, clave.trim());
 }
 
 export function borrarClave(): void {
-  try {
-    window.localStorage.removeItem(CLAVE_LICENCIA);
-  } catch {
-    /* nada que borrar */
-  }
+  borrar(CLAVE_LICENCIA);
 }
 
 /** Cabeceras para una llamada a la API, con la licencia si la hay. */
 export function cabeceras(extra: Record<string, string> = {}): Record<string, string> {
   const clave = typeof window === 'undefined' ? null : leerClave();
-  return clave ? { ...extra, 'x-firme-licencia': clave } : extra;
+  return clave ? { ...extra, 'x-fundalex-licencia': clave } : extra;
 }
 
 export async function comprobarClave(clave: string): Promise<EstadoPro> {
@@ -137,7 +126,7 @@ function mesActual(): string {
 
 function leerCuotas(): Cuotas {
   try {
-    return JSON.parse(window.localStorage.getItem(CLAVE_CUOTAS) ?? '{}') as Cuotas;
+    return JSON.parse(leer(CLAVE_CUOTAS) ?? '{}') as Cuotas;
   } catch {
     return {};
   }
@@ -155,11 +144,7 @@ export function anotarUso(concepto: string): number {
   const previo = cuotas[concepto];
   const usos = previo && previo.mes === mesActual() ? previo.usos + 1 : 1;
   cuotas[concepto] = { mes: mesActual(), usos };
-  try {
-    window.localStorage.setItem(CLAVE_CUOTAS, JSON.stringify(cuotas));
-  } catch {
-    /* sin almacenamiento no se cuenta; el límite del servidor sigue en pie */
-  }
+  escribir(CLAVE_CUOTAS, JSON.stringify(cuotas));
   return usos;
 }
 

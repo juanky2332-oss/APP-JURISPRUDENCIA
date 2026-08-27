@@ -11,7 +11,7 @@ introducir texto que no proceda de CENDOJ o de una transformación declarada de 
 ## Hecho
 
 ### Marca, portada y páginas legales · 27 de agosto de 2026
-El proyecto se llama **Firme** y tiene identidad propia (violeta de sello y verde de bronce sobre
+El proyecto se llama **FundaLex** y tiene identidad propia (violeta de sello y verde de bronce sobre
 papel frío; Newsreader, IBM Plex Sans e IBM Plex Mono). El buscador se ha movido a `/buscar` y `/` es
 ahora una portada con demostración animada, doce consultas de ejemplo que enlazan al buscador con sus
 filtros puestos, planes, preguntas frecuentes y datos estructurados de schema.org. Se han añadido las

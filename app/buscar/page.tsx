@@ -4,7 +4,7 @@ import { Buscador } from '@/components/Buscador';
 import { MARCA } from '@/lib/marca';
 
 export const metadata: Metadata = {
-  // El layout ya aplica la plantilla «%s · Firme»: aquí solo va el nombre de la página.
+  // El layout ya aplica la plantilla «%s · FundaLex»: aquí solo va el nombre de la página.
   title: 'Buscar jurisprudencia',
   description: MARCA.descripcionCorta,
   // El buscador es una herramienta con estado en la URL: no aporta nada

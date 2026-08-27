@@ -110,7 +110,7 @@ export function PanelAlertas() {
           </p>
           <p style={{ marginTop: 16 }}>
             <Link className="btn-principal" href={RUTAS.pro}>
-              Ver Firme Pro
+              Ver FundaLex Pro
             </Link>
           </p>
         </div>

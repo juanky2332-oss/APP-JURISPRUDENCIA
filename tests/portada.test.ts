@@ -91,13 +91,13 @@ describe('marca y planes', () => {
   });
 
   it('no usa un correo de un dominio que todavía no existe', () => {
-    // firme.legal no está comprado: cualquier dirección ahí sería un buzón muerto.
+    // fundalex.legal no está comprado todavía: cualquier dirección ahí sería un buzón muerto.
     expect(MARCA.correo).toMatch(/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i);
-    expect(MARCA.correo.endsWith('@firme.legal')).toBe(false);
+    expect(MARCA.correo.endsWith('@fundalex.legal')).toBe(false);
   });
 
   it('tiene nombre y promesa', () => {
-    expect(MARCA.nombre).toBe('Firme');
+    expect(MARCA.nombre).toBe('FundaLex');
     expect(MARCA.claim.trim()).not.toBe('');
   });
 });

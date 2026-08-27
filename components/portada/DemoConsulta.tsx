@@ -191,7 +191,7 @@ export function DemoConsulta() {
       </div>
 
       <p className="oculto-visual">
-        Ejemplo: al buscar «{CONSULTA}», Firme devuelve la sentencia {RESOLUCION.titulo} del {RESOLUCION.organo},{' '}
+        Ejemplo: al buscar «{CONSULTA}», FundaLex devuelve la sentencia {RESOLUCION.titulo} del {RESOLUCION.organo},{' '}
         {RESOLUCION.sala}, de {RESOLUCION.fecha}, con el identificador {RESOLUCION.ecli}, verificada contra el buscador
         oficial del Consejo General del Poder Judicial.
       </p>

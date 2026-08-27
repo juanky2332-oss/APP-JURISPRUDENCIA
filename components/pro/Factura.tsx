@@ -59,8 +59,8 @@ export function Factura() {
   const total = Math.round((base + iva) * 100) / 100;
   const concepto =
     datos.periodo === 'anual'
-      ? 'Firme Pro — suscripción anual'
-      : 'Firme Pro — suscripción mensual';
+      ? 'FundaLex Pro — suscripción anual'
+      : 'FundaLex Pro — suscripción mensual';
 
   return (
     <div className="herramienta">

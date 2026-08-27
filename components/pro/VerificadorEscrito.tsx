@@ -177,7 +177,7 @@ export function VerificadorEscrito() {
           Pega tu escrito y <em>comprueba cada cita</em>
         </h1>
         <p className="herramienta-lede">
-          Firme localiza los ECLI y las referencias del tipo «STS 564/2014» y le pregunta a CENDOJ por cada una. No
+          FundaLex localiza los ECLI y las referencias del tipo «STS 564/2014» y le pregunta a CENDOJ por cada una. No
           interpreta el escrito ni juzga tus argumentos: solo comprueba que las resoluciones que citas existen y son
           las que dices.
         </p>
@@ -267,7 +267,7 @@ export function VerificadorEscrito() {
               <IconoAviso tamano={30} />
               <h2>No hay citas comprobables en este texto</h2>
               <p>
-                Firme comprueba identificadores: ECLI (<code>ECLI:ES:TS:2014:3877</code>) y referencias con siglas
+                FundaLex comprueba identificadores: ECLI (<code>ECLI:ES:TS:2014:3877</code>) y referencias con siglas
                 (<code>STS 564/2014</code>, <code>SAP B 3695/2026</code>). Una mención como «la sentencia del Supremo de
                 octubre de 2014» describe una resolución pero no la identifica, así que no se puede comprobar sin
                 adivinar — y aquí no se adivina.

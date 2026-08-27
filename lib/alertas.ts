@@ -17,7 +17,9 @@
  *     tanto, la función es real y funciona, solo que la mueve una persona.
  */
 
-const CLAVE = 'firme:alertas';
+import { escribir, leer } from './almacen';
+
+const CLAVE = 'fundalex:alertas';
 
 export type Alerta = {
   id: string;
@@ -32,10 +34,9 @@ export type Alerta = {
   novedades: Array<{ ecli: string | null; roj: string | null; titulo: string; fechaResolucion: string | null }>;
 };
 
-function leer(): Alerta[] {
-  if (typeof window === 'undefined') return [];
+function leerTodo(): Alerta[] {
   try {
-    const datos = JSON.parse(window.localStorage.getItem(CLAVE) ?? '[]') as unknown;
+    const datos = JSON.parse(leer(CLAVE) ?? '[]') as unknown;
     return Array.isArray(datos) ? (datos as Alerta[]) : [];
   } catch {
     return [];
@@ -43,21 +44,17 @@ function leer(): Alerta[] {
 }
 
 function guardar(alertas: Alerta[]): void {
-  try {
-    window.localStorage.setItem(CLAVE, JSON.stringify(alertas));
-  } catch {
-    /* sin almacenamiento la alerta vive solo en esta sesión */
-  }
+  escribir(CLAVE, JSON.stringify(alertas));
 }
 
 export function listarAlertas(): Alerta[] {
-  return leer();
+  return leerTodo();
 }
 
 export type ResultadoCrear = { ok: true; alerta: Alerta } | { ok: false; mensaje: string };
 
 export function crearAlerta(nombre: string, busqueda: string, tope: number): ResultadoCrear {
-  const alertas = leer();
+  const alertas = leerTodo();
   if (alertas.length >= tope) {
     return {
       ok: false,
@@ -88,11 +85,11 @@ export function crearAlerta(nombre: string, busqueda: string, tope: number): Res
 }
 
 export function borrarAlerta(id: string): void {
-  guardar(leer().filter((a) => a.id !== id));
+  guardar(leerTodo().filter((a) => a.id !== id));
 }
 
 export function actualizarAlerta(id: string, cambios: Partial<Alerta>): void {
-  guardar(leer().map((a) => (a.id === id ? { ...a, ...cambios } : a)));
+  guardar(leerTodo().map((a) => (a.id === id ? { ...a, ...cambios } : a)));
 }
 
 export type Novedad = { ecli: string | null; roj: string | null; titulo: string; fechaResolucion: string | null };

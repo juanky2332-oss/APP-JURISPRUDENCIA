@@ -4,7 +4,7 @@ import { MARCA } from '@/lib/marca';
 /**
  * La imagen que sale al compartir el enlace por WhatsApp, LinkedIn o correo.
  *
- * Importa más de lo que parece: Firme se reparte por invitación entre
+ * Importa más de lo que parece: FundaLex se reparte por invitación entre
  * abogados, así que el enlace se pega en una conversación. Sin esta imagen
  * aparece un rectángulo vacío, que es exactamente la impresión contraria a la
  * que queremos dar.
@@ -79,10 +79,10 @@ export default function ImagenOpenGraph() {
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 26 }}>
           <div style={{ fontSize: 74, lineHeight: 1.1, fontWeight: 600, maxWidth: 900 }}>
-            Jurisprudencia firme y reutilizable
+            Del caso al fundamento, con respaldo oficial
           </div>
           <div style={{ fontSize: 30, lineHeight: 1.4, color: '#c0b7ce', maxWidth: 880 }}>
-            Resoluciones del CENDOJ con su ECLI, verificables una por una.
+            Las resoluciones que sostienen tu escrito, con su ECLI verificable.
           </div>
         </div>
 

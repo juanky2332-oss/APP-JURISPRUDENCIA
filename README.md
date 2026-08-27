@@ -1,7 +1,7 @@
-# Firme
+# FundaLex
 
-> **Jurisprudencia firme y reutilizable.**
-> Encuentra resoluciones recurrentes, ECLI y citas que suelen sostener escritos.
+> **Del caso al fundamento, con respaldo oficial.**
+> Encuentra las resoluciones que sostienen tu escrito, con su ECLI y su respaldo oficial.
 
 Buscador de jurisprudencia española que consulta **exclusivamente la fuente oficial**: el buscador del
 **CENDOJ** (Centro de Documentación Judicial del Consejo General del Poder Judicial), en
@@ -129,7 +129,7 @@ alertas y las preguntas en lenguaje natural sin contar.
 **Cómo se reconoce a un usuario Pro, sin base de datos.** Una licencia es una cadena
 firmada con HMAC-SHA256 que lleva dentro el correo del titular, la caducidad, el número de
 factura y el importe. El cliente la guarda en su navegador y la manda en la cabecera
-`x-firme-licencia`; el servidor comprueba la firma en cada petición. Ni cuentas, ni
+`x-fundalex-licencia`; el servidor comprueba la firma en cada petición. Ni cuentas, ni
 sesiones, ni tabla de usuarios — coherente con la decisión de no tener base de datos.
 
 Consecuencias, dichas por delante: **no se puede revocar una licencia suelta** sin rotar el
@@ -149,7 +149,12 @@ El script imprime la clave ya comprobada y el desglose con IVA. El cliente la pe
 `/pro` y su factura queda en `/factura`. Los importes salen de `lib/marca.ts`, que es lo
 mismo que enseña la portada: la factura no puede desviarse del precio publicado.
 
-Requiere `FIRME_SECRETO_LICENCIAS` con el **mismo valor** en tu equipo y en Vercel.
+Requiere `FUNDALEX_SECRETO_LICENCIAS` con el **mismo valor** en tu equipo y en Vercel.
+
+El producto se llamó **Firme** antes de llamarse FundaLex. Por eso se siguen aceptando el
+prefijo de clave `FIRME-PRO`, la variable `FIRME_SECRETO_LICENCIAS` y las claves de
+almacenamiento `firme:*` del navegador, que se migran solas al leerlas: una licencia ya
+entregada y unas carpetas ya guardadas no pueden romperse porque cambiemos de marca.
 
 Las cuotas del plan gratuito se cuentan en el navegador. Son una cortesía de interfaz, no
 una barrera: quien vacíe su almacenamiento reinicia el contador. La barrera real es el

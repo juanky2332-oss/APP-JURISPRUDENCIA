@@ -1,5 +1,5 @@
 /**
- * El emblema de Firme.
+ * El emblema de FundaLex.
  *
  * Un sello de registro de entrada: el círculo del cuño, la corona exterior y,
  * dentro, la marca de conformidad. Es la misma idea que la insignia de
