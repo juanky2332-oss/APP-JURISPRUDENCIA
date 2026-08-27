@@ -5,6 +5,7 @@ import { LIMITES } from '../lib/limites';
 import { materiasDe, urlSumarioOficial } from '../lib/boe';
 import { aCsv, aMarkdown, aTextoParaEscrito, citaDe, nombreArchivo } from '../lib/dossier';
 import { calcularNovedades, type Alerta } from '../lib/alertas';
+import { sanearFiltros } from '../lib/traductor';
 import type { Carpeta } from '../lib/carpetas';
 
 beforeAll(() => {
@@ -276,5 +277,40 @@ describe('límites de los planes', () => {
   it('no da alertas en el plan gratuito, como dice la portada', () => {
     expect(LIMITES.gratis.alertas).toBe(0);
     expect(LIMITES.pro.alertas).toBeGreaterThan(0);
+  });
+});
+
+describe('saneado de los filtros que devuelve la IA', () => {
+  it('descarta un código de órgano que el CGPJ no reconoce', () => {
+    // Es el fallo que más daño hace: si un código inventado llegara a CENDOJ,
+    // devolvería su página de error y el usuario leería «sin resultados» para
+    // una búsqueda que en realidad nunca se hizo.
+    const f = sanearFiltros({ q: 'despido', tipoOrgano: '9999', razonamiento: 'x' });
+    expect(f?.tipoOrgano).toBeUndefined();
+    expect(f?.q).toBe('despido');
+  });
+
+  it('descarta una jurisdicción inventada pero conserva las válidas', () => {
+    expect(sanearFiltros({ q: 'a', jurisdiccion: 'MARCIANA', razonamiento: '' })?.jurisdiccion).toBeUndefined();
+    expect(sanearFiltros({ q: 'a', jurisdiccion: 'SOCIAL', razonamiento: '' })?.jurisdiccion).toBe('SOCIAL');
+  });
+
+  it('exige fechas en formato AAAA-MM-DD', () => {
+    expect(sanearFiltros({ q: 'a', fechaDesde: '01/01/2020', razonamiento: '' })?.fechaDesde).toBeUndefined();
+    expect(sanearFiltros({ q: 'a', fechaDesde: '2020-01-01', razonamiento: '' })?.fechaDesde).toBe('2020-01-01');
+  });
+
+  it('rechaza una respuesta sin términos de búsqueda', () => {
+    expect(sanearFiltros({ razonamiento: 'sin q' })).toBeNull();
+    expect(sanearFiltros({ q: '   ' })).toBeNull();
+    expect(sanearFiltros(null)).toBeNull();
+    expect(sanearFiltros('texto suelto')).toBeNull();
+  });
+
+  it('recorta lo que llega demasiado largo', () => {
+    const f = sanearFiltros({ q: 'x'.repeat(900), ponente: 'y'.repeat(400), razonamiento: 'z'.repeat(900) });
+    expect(f?.q.length).toBe(300);
+    expect(f?.ponente?.length).toBe(120);
+    expect(f?.razonamiento.length).toBe(400);
   });
 });

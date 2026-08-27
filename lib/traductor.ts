@@ -16,12 +16,34 @@ import { log } from './logger';
  * sigue funcionando entera con la búsqueda de siempre. Es una capa de comodidad
  * sobre el buscador, nunca un requisito para usarlo.
  *
- * El modelo es Claude Haiku 4.5 por decisión expresa: la tarea es una
- * traducción corta y acotada, y a este volumen sale por unas milésimas de euro
- * por consulta.
+ * **Funciona con Anthropic o con OpenAI**, según la clave que haya en el
+ * entorno. No es indecisión: es que la tarea —convertir una frase en cinco
+ * campos de un formulario— la hace igual de bien cualquier modelo pequeño, y
+ * atarse a un proveedor para esto sería regalar una dependencia a cambio de
+ * nada. Si están las dos claves, manda Anthropic.
+ *
+ * A OpenAI se le llama por HTTP directo en lugar de con su SDK: es una única
+ * petición, y así se controla exactamente el cuerpo que se envía. Importa,
+ * porque los modelos gpt-5 **rechazan `max_tokens`** y exigen
+ * `max_completion_tokens`; además gastan tokens de razonamiento, así que sin
+ * `reasoning_effort: "low"` una respuesta corta puede volver vacía.
  */
 
-const MODELO = 'claude-haiku-4-5';
+const MODELO_ANTHROPIC = 'claude-haiku-4-5';
+const MODELO_OPENAI = 'gpt-5.4-mini';
+
+export type Proveedor = 'anthropic' | 'openai';
+
+function claveDe(nombre: string): string | null {
+  const v = process.env[nombre];
+  return typeof v === 'string' && v.length > 10 ? v : null;
+}
+
+export function proveedor(): Proveedor | null {
+  if (claveDe('ANTHROPIC_API_KEY')) return 'anthropic';
+  if (claveDe('OPENAI_API_KEY')) return 'openai';
+  return null;
+}
 
 export type FiltrosTraducidos = {
   q: string;
@@ -36,7 +58,7 @@ export type FiltrosTraducidos = {
 };
 
 export function hayTraductor(): boolean {
-  return typeof process.env['ANTHROPIC_API_KEY'] === 'string' && process.env['ANTHROPIC_API_KEY'].length > 10;
+  return proveedor() !== null;
 }
 
 function instrucciones(): string {
@@ -85,7 +107,7 @@ const FECHA = /^\d{4}-\d{2}-\d{2}$/;
  * resultados» para una búsqueda que nunca se hizo. Se descarta en silencio lo
  * que no está catalogado: mejor una búsqueda más amplia que una rota.
  */
-function sanear(bruto: unknown): FiltrosTraducidos | null {
+export function sanearFiltros(bruto: unknown): FiltrosTraducidos | null {
   if (bruto === null || typeof bruto !== 'object') return null;
   const o = bruto as Record<string, unknown>;
   if (typeof o['q'] !== 'string' || o['q'].trim() === '') return null;
@@ -114,25 +136,63 @@ function sanear(bruto: unknown): FiltrosTraducidos | null {
   return filtros;
 }
 
-export async function traducirPregunta(pregunta: string): Promise<FiltrosTraducidos | null> {
-  if (!hayTraductor()) return null;
-
+async function conAnthropic(pregunta: string): Promise<string> {
   const cliente = new Anthropic();
   const respuesta = await cliente.messages.create({
-    model: MODELO,
+    model: MODELO_ANTHROPIC,
     max_tokens: 700,
+    // El bloque de instrucciones es siempre el mismo: en caché sale a una
+    // décima parte de precio a partir de la segunda consulta.
     system: [{ type: 'text', text: instrucciones(), cache_control: { type: 'ephemeral' } }],
     messages: [{ role: 'user', content: pregunta.slice(0, 1500) }],
   });
 
-  const texto = respuesta.content
+  return respuesta.content
     .filter((b): b is Anthropic.TextBlock => b.type === 'text')
     .map((b) => b.text)
     .join('')
     .trim();
+}
+
+async function conOpenai(pregunta: string): Promise<string> {
+  const res = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      authorization: `Bearer ${claveDe('OPENAI_API_KEY')}`,
+    },
+    body: JSON.stringify({
+      model: MODELO_OPENAI,
+      // `max_completion_tokens`, no `max_tokens`: los gpt-5 rechazan el segundo
+      // con un 400 que no dice nada útil si no lo sabes.
+      max_completion_tokens: 900,
+      reasoning_effort: 'low',
+      response_format: { type: 'json_object' },
+      messages: [
+        { role: 'system', content: instrucciones() },
+        { role: 'user', content: pregunta.slice(0, 1500) },
+      ],
+    }),
+  });
+
+  if (!res.ok) {
+    const detalle = await res.text();
+    log.warn('OpenAI ha rechazado la traducción', { estado: res.status, detalle: detalle.slice(0, 300) });
+    throw new Error(`OpenAI ha respondido con un ${res.status}.`);
+  }
+
+  const cuerpo = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
+  return (cuerpo.choices?.[0]?.message?.content ?? '').trim();
+}
+
+export async function traducirPregunta(pregunta: string): Promise<FiltrosTraducidos | null> {
+  const cual = proveedor();
+  if (!cual) return null;
+
+  const texto = cual === 'anthropic' ? await conAnthropic(pregunta) : await conOpenai(pregunta);
 
   try {
-    const filtros = sanear(extraerJson(texto));
+    const filtros = sanearFiltros(extraerJson(texto));
     if (!filtros) log.warn('El traductor ha devuelto algo que no encaja con el formulario');
     return filtros;
   } catch {

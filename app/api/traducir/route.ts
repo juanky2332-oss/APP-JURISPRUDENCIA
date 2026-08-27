@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { hayTraductor, traducirPregunta } from '@/lib/traductor';
+import { hayTraductor, proveedor, traducirPregunta } from '@/lib/traductor';
 import { contextoDePeticion } from '@/lib/plan';
 import { comprobarRateLimit, ipDePeticion } from '@/lib/ratelimit';
 import { config } from '@/lib/config';
@@ -49,7 +49,7 @@ export async function POST(req: Request): Promise<NextResponse> {
         'No se ha podido traducir la pregunta a filtros. Prueba a escribir directamente los términos que buscas.',
       );
     }
-    return NextResponse.json({ ok: true, plan: ctx.plan, pregunta, filtros });
+    return NextResponse.json({ ok: true, plan: ctx.plan, proveedor: proveedor(), pregunta, filtros });
   } catch (e) {
     log.warn('Fallo del traductor', { mensaje: e instanceof Error ? e.message : 'desconocido' });
     return error(
