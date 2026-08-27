@@ -86,8 +86,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               <Link href="/#como-funciona">Cómo funciona</Link>
               <Link href="/#precios">Precios</Link>
               <Link href="/#preguntas">Preguntas</Link>
+              <Link href={RUTAS.verificar}>Verificar escrito</Link>
+              <Link href={RUTAS.pro}>Tu cuenta</Link>
               <Link className="menu-accion" href={RUTAS.buscador}>
-                Abrir el buscador
+                Buscador
               </Link>
             </nav>
           </div>
@@ -117,8 +119,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               <nav className="pie-enlaces" aria-label="Producto">
                 <h2>Producto</h2>
                 <Link href={RUTAS.buscador}>Buscador</Link>
-                <Link href="/#como-funciona">Cómo funciona</Link>
-                <Link href="/#precios">Precios</Link>
+                <Link href={RUTAS.verificar}>Verificar un escrito</Link>
+                <Link href={RUTAS.boe}>El BOE de tu materia</Link>
+                <Link href={RUTAS.carpetas}>Carpetas de asunto</Link>
+                <Link href={RUTAS.alertas}>Alertas</Link>
+                <Link href={RUTAS.pro}>Tu cuenta</Link>
                 <Link href={RUTAS.salud}>Estado del servicio</Link>
               </nav>
 

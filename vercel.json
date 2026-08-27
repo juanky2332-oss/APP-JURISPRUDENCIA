@@ -18,6 +18,21 @@
     },
     "app/api/verificar/route.ts": {
       "maxDuration": 30
+    },
+    "app/api/cita/route.ts": {
+      "maxDuration": 60
+    },
+    "app/api/escrito/route.ts": {
+      "maxDuration": 15
+    },
+    "app/api/boe/route.ts": {
+      "maxDuration": 30
+    },
+    "app/api/traducir/route.ts": {
+      "maxDuration": 30
+    },
+    "app/api/licencia/route.ts": {
+      "maxDuration": 10
     }
   },
   "headers": [

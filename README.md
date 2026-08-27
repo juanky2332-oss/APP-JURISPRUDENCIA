@@ -71,6 +71,7 @@ cp .env.example .env.local
 | `npm run typecheck` | Comprobación de tipos (TypeScript estricto). |
 | `npm run verify` | `typecheck` + `test`. Ejecútalo antes de desplegar. |
 | `npm run audit:cendoj` | **Auditoría en vivo de la fuente oficial** (ver más abajo). |
+| `npm run licencia -- --correo x@y.es` | Emite una licencia Pro y la comprueba antes de entregarla. |
 
 ### `npm run audit:cendoj`
 
@@ -118,6 +119,43 @@ Ejecútala cuando la app empiece a devolver fichas vacías: te dirá exactamente
 
 ---
 
+## El plan Pro
+
+La jurisprudencia es gratis y lo seguirá siendo. Pro añade el trabajo de alrededor:
+verificación de escritos sin cuota, el BOE por materia con histórico, carpetas de asunto,
+alertas y las preguntas en lenguaje natural sin contar.
+
+**Cómo se reconoce a un usuario Pro, sin base de datos.** Una licencia es una cadena
+firmada con HMAC-SHA256 que lleva dentro el correo del titular, la caducidad, el número de
+factura y el importe. El cliente la guarda en su navegador y la manda en la cabecera
+`x-firme-licencia`; el servidor comprueba la firma en cada petición. Ni cuentas, ni
+sesiones, ni tabla de usuarios — coherente con la decisión de no tener base de datos.
+
+Consecuencias, dichas por delante: **no se puede revocar una licencia suelta** sin rotar el
+secreto, que invalidaría todas. Por eso se emiten a doce meses. Y quien comparte su clave
+comparte su acceso, igual que una contraseña; la clave lleva el correo del titular escrito
+dentro y visible en su panel.
+
+**Dar de alta a alguien** (después de cobrar, mientras no haya pasarela):
+
+```bash
+npm run licencia -- --correo abogada@despacho.es
+npm run licencia -- --correo x@y.es --periodo mensual
+npm run licencia -- --correo x@y.es --fundador          # precio fundador
+```
+
+El script imprime la clave ya comprobada y el desglose con IVA. El cliente la pega en
+`/pro` y su factura queda en `/factura`. Los importes salen de `lib/marca.ts`, que es lo
+mismo que enseña la portada: la factura no puede desviarse del precio publicado.
+
+Requiere `FIRME_SECRETO_LICENCIAS` con el **mismo valor** en tu equipo y en Vercel.
+
+Las cuotas del plan gratuito se cuentan en el navegador. Son una cortesía de interfaz, no
+una barrera: quien vacíe su almacenamiento reinicia el contador. La barrera real es el
+límite de peticiones por IP del servidor, que existe para no molestar a CENDOJ.
+
+---
+
 ## Rutas
 
 | Ruta | Qué es | ¿Se indexa? |
@@ -127,6 +165,12 @@ Ejecútala cuando la app empiece a devolver fichas vacías: te dirá exactamente
 | `/resolucion` | Ficha de una resolución, con fragmentos literales y cita. | No |
 | `/documento` | Puente hacia el PDF oficial, con el aviso del control antidescargas. | No |
 | `/aviso-legal`, `/terminos`, `/privacidad`, `/cookies` | Páginas legales. | Sí |
+| `/pro` | Activar la licencia, ver su estado y llegar a las herramientas. | No |
+| `/verificar` | Comprobar las citas de un escrito contra CENDOJ. | No |
+| `/boe` | Sumario del BOE filtrado por materia. | No |
+| `/carpetas` | Carpetas de asunto y exportación del dossier. | No |
+| `/alertas` | Consultas vigiladas. | No |
+| `/factura` | Factura con IVA, generada desde la licencia. | No |
 | `/api/*` | Endpoints JSON. Ver más abajo. | No |
 
 Las rutas están centralizadas en `lib/rutas.ts`: si una cambia, cambia ahí y no se queda ningún

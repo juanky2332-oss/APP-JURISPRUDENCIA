@@ -26,6 +26,8 @@ import {
   TIPOS_RESOLUCION,
 } from '@/lib/cendoj/catalogos';
 import type { RespuestaBusqueda, RespuestaError } from '@/lib/tipos';
+import { VigilarConsulta } from './pro/VigilarConsulta';
+import { PreguntaNatural, type FiltrosTraducidos } from './pro/PreguntaNatural';
 
 type Formulario = {
   q: string;
@@ -238,6 +240,28 @@ export function Buscador() {
     }));
   }
 
+  /**
+   * Vuelca en el formulario los filtros que ha propuesto la traducción y lanza
+   * la búsqueda. Se sobrescriben solo los campos que la traducción trae: si el
+   * usuario ya tenía puesta una jurisdicción y la pregunta no menciona ninguna,
+   * se respeta la suya.
+   */
+  function aplicarTraduccion(f: FiltrosTraducidos) {
+    const siguiente: Formulario = {
+      ...formulario,
+      q: f.q,
+      jurisdiccion: f.jurisdiccion ?? formulario.jurisdiccion,
+      tipoOrgano: f.tipoOrgano ?? formulario.tipoOrgano,
+      tiposResolucion: f.tiposResolucion ?? formulario.tiposResolucion,
+      fechaDesde: f.fechaDesde ?? formulario.fechaDesde,
+      fechaHasta: f.fechaHasta ?? formulario.fechaHasta,
+      ponente: f.ponente ?? formulario.ponente,
+    };
+    setFormulario(siguiente);
+    setPagina(1);
+    void ejecutar(siguiente, 1);
+  }
+
   function limpiar() {
     setFormulario(VACIO);
     setPagina(1);
@@ -323,6 +347,8 @@ export function Buscador() {
           </div>
         </section>
       ) : null}
+
+      <PreguntaNatural alAplicar={aplicarTraduccion} />
 
       <form className="panel buscador" onSubmit={enviar}>
         <div className="caja-principal">
@@ -553,7 +579,13 @@ export function Buscador() {
                 'CENDOJ no ha devuelto un contador de resultados'
               )}
             </span>
-            <span>Respuesta de la fuente oficial en {datos.msTranscurridos} ms</span>
+            <span className="barra-acciones">
+              <VigilarConsulta
+                busqueda={aParametros(formulario, pagina).toString()}
+                descripcion={formulario.q || 'Consulta vigilada'}
+              />
+              <span>Respuesta de la fuente oficial en {datos.msTranscurridos} ms</span>
+            </span>
           </div>
 
           {datos.resultados.length === 0 ? (

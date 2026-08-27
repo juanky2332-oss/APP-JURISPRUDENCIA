@@ -9,6 +9,7 @@ import { BotonOficial } from './BotonOficial';
 import { BuscarEnCendoj } from './BuscarEnCendoj';
 import { IconoCopiar, IconoDocumento, IconoLibro, IconoSello, IconoAviso } from './Iconos';
 import { citaConFuente, fechaLarga } from '@/lib/cita';
+import { GuardarEnCarpeta } from './pro/GuardarEnCarpeta';
 
 /** Muestra "no disponible" en vez de inventar el dato ausente. */
 function Dato({ etiqueta, valor }: { etiqueta: string; valor: string | null }) {
@@ -154,6 +155,8 @@ export function TarjetaResultado({
       ) : null}
 
       <div className="acciones-resultado">
+        <GuardarEnCarpeta resolucion={resolucion} />
+
         <Link className="btn-texto" href={enlaceDetalle}>
           <IconoLibro tamano={15} />
           Ver ficha completa

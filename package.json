@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "description": "Buscador de jurisprudencia española sobre la fuente oficial CENDOJ / Poder Judicial.",
-  "engines": { "node": ">=20.9.0" },
+  "engines": {
+    "node": ">=20.9.0"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -13,9 +15,11 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "audit:cendoj": "tsx scripts/auditar-cendoj.ts",
-    "verify": "npm run typecheck && npm run test"
+    "verify": "npm run typecheck && npm run test",
+    "licencia": "tsx scripts/emitir-licencia.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.121.0",
     "cheerio": "^1.0.0",
     "next": "^15.5.4",
     "react": "^19.1.0",
