@@ -1642,6 +1642,16 @@ kbd {
     flex-direction: column;
   }
 
+  /*
+   * En columna, el `flex-basis: 340px` de la caja de búsqueda deja de ser un
+   * ancho mínimo y pasa a ser su ALTO: en el móvil salía un recuadro de 340 px
+   * con la palabra buscada flotando en medio. En vertical no hay que repartir
+   * nada, así que cada campo mide lo que ocupa.
+   */
+  .campo-busqueda {
+    flex: 0 0 auto;
+  }
+
   .btn-principal {
     width: 100%;
   }
