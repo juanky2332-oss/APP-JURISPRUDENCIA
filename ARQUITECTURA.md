@@ -41,7 +41,7 @@ campos. Los que usa esta aplicación, con su nombre exacto:
 Los catálogos de códigos están en `lib/cendoj/catalogos.ts`, copiados literalmente de los `value` del
 formulario oficial.
 
-### 1.3 Los cuatro hallazgos que condicionan el diseño
+### 1.3 Los hallazgos que condicionan el diseño
 
 **(a) `search.action` acepta GET.** Se puede consultar sin reconstruir el POST del formulario. Esto es
 lo que hace viable el proyecto.
@@ -97,6 +97,58 @@ con parámetros **no ejecuta la búsqueda**: repinta el formulario vacío. El ú
 propio CGPJ usa para una resolución es el del documento (`data-link` en su HTML de resultados). Por eso
 «ver en poderjudicial.es» abre el PDF oficial, y repetir la búsqueda abre su formulario con el ECLI ya
 copiado al portapapeles, en vez de enviar al usuario a una URL que no le va a funcionar.
+
+**(i) La base ordinaria del CENDOJ empieza en 1979. Lo anterior está en otra colección.**
+El buscador tiene un botón «Histórico (TS)» que envía `HISTORICOPUBLICO=true`, y esa bandera **cambia de
+base de datos**: sin ella, el corpus va de enero de 1979 en adelante; con ella, de 1868 a diciembre de
+1978, y nada más. Comprobado contra la fuente:
+
+| Consulta | Sin la bandera | Con `HISTORICOPUBLICO=true` |
+| --- | --- | --- |
+| `ROJ=STS 37/1868` | **0 resultados** | 1 (la sentencia, de 8 de julio de 1868) |
+| `ECLI:ES:TS:1975:100` | **0 resultados** | 1 |
+| `TEXT=arrendamiento`, hasta 31/12/1970 | 1 | **16.802** |
+
+Es el hallazgo de mayor consecuencia práctica de toda esta lista: **sin él, la aplicación le decía a un
+letrado que una sentencia que existe no existe**, incluso pidiéndola por su identificador exacto. Por eso
+`lib/cendoj/servicio.ts` repite en la colección histórica cualquier consulta que se quede a cero y pueda
+apuntar a esos años, lo dice cuando lo hace, y avisa con un botón cuando el rango de fechas cae antes de
+1979 aunque la base ordinaria haya devuelto algo (que puede devolver: no está cortada limpiamente en
+1979, tiene rezagados sueltos).
+
+**(j) El tipo de resolución viaja en dos parámetros, no en uno.** El desplegable «Tipo res.» es un árbol,
+y su JavaScript (`checkTipoRes`/`addTipoRes`) reparte cada casilla según su `data-field`: las ramas anchas
+van a `TIPORESOLUCION` y las hojas a `SUBTIPORESOLUCION`. Mandar una hoja por el campo equivocado
+**devuelve cero resultados sin ningún error**, que es la peor forma posible de fallar. Medido con
+`TEXT=despido`:
+
+| Valor | `TIPORESOLUCION` | `SUBTIPORESOLUCION` |
+| --- | --- | --- |
+| `SENTENCIA` | 443.599 | página de error |
+| `SENTENCIA CASACION` | **0, en silencio** | 122 |
+| `AUTO` | 46.000 | página de error |
+| `AUTO ADMISION` | **0, en silencio** | 88 |
+
+Los dos campos se **suman**, no se cruzan: `TIPORESOLUCION=SENTENCIA` + `SUBTIPORESOLUCION=AUTO OTROS`
+devuelve 489.506, la suma exacta de 443.599 y 45.907. `AUTO RECURSO` es un nodo intermedio del árbol y no
+es consultable: la app lo expande en `AUTO ADMISION|AUTO INADMISION`.
+
+**(k) Hay filtros que CENDOJ rechaza si van solos.** Una jurisdicción, un tipo de resolución, una norma o
+un idioma, sin nada más, devuelven la página de error del punto (c) —que la app traduciría por «la fuente
+no responde»—. En cambio el ponente, el nº de recurso, el tipo de órgano, la localización y las fechas sí
+buscan por sí solos. `filtrosInsuficientes()` lo comprueba **antes** de preguntar y explica qué falta.
+
+**(l) Filtros del formulario oficial que la app no usaba.** `VALUESCOMUNIDAD` acota por comunidad
+autónoma (`MURCIA(C)`) o provincia (`MÁLAGA(P)`) —con las tildes puestas: `MALAGA(P)` devuelve cero—;
+`TIPOINTERES_*` son las colecciones que mantiene el propio CGPJ, y su valor no es `true` sino la etiqueta
+literal (`TIPOINTERES_JURIDICO=Interés Jurídico`); `SECCIONSOLOPLENO`, `SECCION` y `SECCIONAUTO`
+completan el juego. El árbol de localizaciones lo sirve `jurisprudencia.action` con
+`action=getComunidades`; está volcado en `lib/cendoj/catalogos.ts` porque no cambia.
+
+**(m) CENDOJ publica con semanas de retraso.** Medido el 29/08/2026: la resolución más reciente de
+cualquier órgano era del 20/08/2026 y la más reciente del Tribunal Supremo, del 03/08/2026. No es un
+defecto de la app —consulta en directo— pero es la explicación de casi todo «esto no aparece». Por eso
+`/api/cobertura` lo mide contra la fuente y la interfaz lo enseña con fecha concreta.
 
 ### 1.4 Clasificación honesta de cada técnica
 
@@ -280,6 +332,11 @@ Ninguna de estas es un defecto de implementación: son propiedades de la fuente.
   estable es el **ECLI**, y por eso es el eje de la ficha y de las citas.
 - **La cobertura es la de CENDOJ**, que no publica el 100 % de las resoluciones dictadas en España.
   Que algo no aparezca aquí no significa que no exista.
+- **CENDOJ publica con semanas de retraso.** Lo dictado en las últimas semanas no está en la fuente, así
+  que tampoco aquí. `/api/cobertura` mide hasta qué día llega y la interfaz lo dice con esa fecha.
+- **El histórico del Tribunal Supremo (hasta 1978) es otra base de datos**, y no se pueden buscar las dos
+  a la vez: es una u otra. La app cambia sola cuando la ordinaria no devuelve nada, y avisa cuando el
+  rango de fechas cae ahí.
 - **El ponente y otros metadatos faltan con frecuencia** en resoluciones antiguas. Se muestran como no
   disponibles.
 - **El «Resumen Automático» de CENDOJ es un recorte de texto**, no una síntesis fiable. Se etiqueta como

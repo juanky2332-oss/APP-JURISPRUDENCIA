@@ -13,12 +13,16 @@ import type {
 import { obtenerHtml, ErrorFuente } from './sesion';
 import { parsearResultados } from './parser';
 import {
+  apuntaAntesDe1979,
   construirParametros,
+  filtrosInsuficientes,
+  puedeSerAnteriorA1979,
   urlBusqueda,
   urlBuscadorOficial,
   urlBuscadorPorEcli,
   MAX_DOCUMENTOS_RECUPERABLES,
 } from './parametros';
+import { PRIMER_ANYO_BASE_ORDINARIA } from './catalogos';
 import { fechaLarga } from '../cita';
 
 /**
@@ -70,8 +74,22 @@ export async function buscar(entrada: ParametrosBusqueda): Promise<ResultadoBusq
     });
   }
 
-  const paramsCendoj = construirParametros(parametros);
-  const url = urlBusqueda(paramsCendoj);
+  let paramsCendoj = construirParametros(parametros);
+
+  // CENDOJ rechaza con su página de error algunas combinaciones que parecen
+  // razonables (una jurisdicción sola, un tipo de resolución solo…). Se avisa
+  // antes de preguntar, en vez de traducir su error por «fuente caída».
+  const insuficientes = filtrosInsuficientes(paramsCendoj);
+  if (insuficientes.length > 0) {
+    return respuestaVacia(parametros, paramsCendoj, inicio, [
+      {
+        tipo: 'atencion',
+        mensaje:
+          `El buscador del CGPJ no acepta una consulta hecha solo con ${listar(insuficientes)}. ` +
+          'Añade términos de búsqueda, un órgano, un ponente, unas fechas o una localización.',
+      },
+    ]);
+  }
 
   log.info('Consulta a CENDOJ', {
     TEXT: paramsCendoj.TEXT ?? '',
@@ -80,8 +98,34 @@ export async function buscar(entrada: ParametrosBusqueda): Promise<ResultadoBusq
     start: paramsCendoj.start ?? '1',
   });
 
-  const { html } = await obtenerHtml(url, urlBuscadorOficial(paramsCendoj));
-  const { totalDeclarado, resoluciones } = parsearResultados(html);
+  let { html } = await obtenerHtml(urlBusqueda(paramsCendoj), urlBuscadorOficial(paramsCendoj));
+  let { totalDeclarado, resoluciones } = parsearResultados(html);
+
+  /**
+   * Rescate en la colección histórica del Tribunal Supremo.
+   *
+   * La base ordinaria de CENDOJ empieza en 1979. Todo lo anterior está en otra
+   * colección que solo se abre con `HISTORICOPUBLICO=true`, y sin esa bandera
+   * **ni siquiera se encuentra buscando por el identificador exacto**:
+   * comprobado que `ROJ=STS 37/1868` devuelve cero, y con la bandera devuelve
+   * esa misma sentencia. Sin este rescate, la aplicación le diría a un letrado
+   * que una sentencia que existe no existe, que es el peor error que puede
+   * cometer.
+   */
+  let rescatadoDelHistorico = false;
+  if (resoluciones.length === 0 && !parametros.historico && puedeSerAnteriorA1979(parametros)) {
+    const paramsHistorico = construirParametros({ ...parametros, historico: true });
+    const reintento = await obtenerHtml(urlBusqueda(paramsHistorico), urlBuscadorOficial(paramsHistorico));
+    const enHistorico = parsearResultados(reintento.html);
+    if (enHistorico.resoluciones.length > 0) {
+      paramsCendoj = paramsHistorico;
+      html = reintento.html;
+      totalDeclarado = enHistorico.totalDeclarado;
+      resoluciones = enHistorico.resoluciones;
+      rescatadoDelHistorico = true;
+      log.info('Resultados encontrados en la colección histórica del TS', { encontrados: resoluciones.length });
+    }
+  }
 
   if (!flags.extraccionMetadatos) {
     avisos.push({
@@ -121,9 +165,32 @@ export async function buscar(entrada: ParametrosBusqueda): Promise<ResultadoBusq
     });
   }
 
+  const enHistorico = paramsCendoj.HISTORICOPUBLICO === 'true';
+  const sugerirHistorico = !enHistorico && apuntaAntesDe1979(parametros);
+
+  // `sugerirHistorico` no genera aviso de texto: la interfaz lo convierte en un
+  // botón que cambia de base, que es lo único útil que se puede hacer con ello.
+
+  if (rescatadoDelHistorico) {
+    avisos.push({
+      tipo: 'atencion',
+      mensaje:
+        `La base ordinaria del CENDOJ empieza en ${PRIMER_ANYO_BASE_ORDINARIA} y no devolvía nada, así que la consulta ` +
+        'se ha repetido en la colección histórica del Tribunal Supremo (hasta 1978). Estos resultados salen de ahí.',
+    });
+  } else if (enHistorico) {
+    avisos.push({
+      tipo: 'info',
+      mensaje:
+        'Estás buscando en la colección histórica del Tribunal Supremo (hasta 1978 inclusive). Es una base ' +
+        'distinta de la ordinaria: no incluye resoluciones posteriores.',
+    });
+  }
+
   if (resultados.length === 0) {
     avisos.push({
       tipo: 'info',
+      clave: 'sin-resultados',
       mensaje: 'CENDOJ no ha devuelto ninguna resolución para esta consulta. No se muestra nada no verificado.',
     });
   }
@@ -136,8 +203,40 @@ export async function buscar(entrada: ParametrosBusqueda): Promise<ResultadoBusq
     pagina: Math.max(1, Math.trunc(parametros.pagina ?? 1)),
     porPagina: Number.parseInt(paramsCendoj.recordsPerPage ?? '10', 10),
     consultaEnviada: { url: urlBuscadorOficial(paramsCendoj), parametros: paramsCendoj },
+    historico: enHistorico,
+    rescatadoDelHistorico,
+    sugerirHistorico,
     avisos,
     sugerencias: consulta.sugerencias,
+    msTranscurridos: Date.now() - inicio,
+  };
+}
+
+function listar(partes: string[]): string {
+  if (partes.length <= 1) return partes[0] ?? '';
+  return `${partes.slice(0, -1).join(', ')} y ${partes[partes.length - 1]}`;
+}
+
+/** Respuesta bien formada sin llegar a preguntar a CENDOJ. */
+function respuestaVacia(
+  parametros: ParametrosBusqueda,
+  paramsCendoj: Record<string, string>,
+  inicio: number,
+  avisos: Aviso[],
+): ResultadoBusqueda {
+  return {
+    ok: true,
+    totalDeclarado: null,
+    maxRecuperable: MAX_DOCUMENTOS_RECUPERABLES,
+    resultados: [],
+    pagina: Math.max(1, Math.trunc(parametros.pagina ?? 1)),
+    porPagina: Number.parseInt(paramsCendoj.recordsPerPage ?? '10', 10),
+    consultaEnviada: { url: urlBuscadorOficial(paramsCendoj), parametros: paramsCendoj },
+    historico: paramsCendoj.HISTORICOPUBLICO === 'true',
+    rescatadoDelHistorico: false,
+    sugerirHistorico: false,
+    avisos,
+    sugerencias: [],
     msTranscurridos: Date.now() - inicio,
   };
 }
@@ -188,13 +287,31 @@ export async function verificar(identificador: string): Promise<ResultadoVerific
   const urlOficial = esEcliValido ? urlBuscadorPorEcli(valor) : urlBuscadorOficial(params);
 
   const { html } = await obtenerHtml(urlBusqueda(params), urlOficial);
-  const { resoluciones } = parsearResultados(html);
+  let resoluciones = parsearResultados(html).resoluciones;
   const comprobadoEn = new Date().toISOString();
 
-  const coincidencia =
-    resoluciones.find((r) =>
+  const buscarCoincidencia = (lista: typeof resoluciones) =>
+    lista.find((r) =>
       esEcliValido ? r.ecli !== null && normalizarEcli(r.ecli) === valor : r.roj !== null && normalizarRoj(r.roj) === valor,
     ) ?? null;
+
+  let coincidencia = buscarCoincidencia(resoluciones);
+
+  // Antes de decir «no existe», hay que mirar en la colección histórica del
+  // Tribunal Supremo: la base ordinaria arranca en 1979 y una resolución
+  // anterior no aparece ni preguntando por su ECLI exacto.
+  if (!coincidencia && puedeSerAnteriorA1979(esEcliValido ? { ecli: valor } : { roj: valor })) {
+    const paramsHistorico = construirParametros(
+      esEcliValido ? { ecli: valor, porPagina: 10, historico: true } : { roj: valor, porPagina: 10, historico: true },
+    );
+    const reintento = await obtenerHtml(urlBusqueda(paramsHistorico), urlOficial);
+    const enHistorico = parsearResultados(reintento.html).resoluciones;
+    const encontrada = buscarCoincidencia(enHistorico);
+    if (encontrada) {
+      resoluciones = enHistorico;
+      coincidencia = encontrada;
+    }
+  }
 
   if (!coincidencia) {
     log.warn('Verificación negativa', { identificador: valor, devueltos: resoluciones.length });

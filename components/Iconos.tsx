@@ -182,3 +182,81 @@ export function IconoAviso(props: PropsIcono) {
     </svg>
   );
 }
+
+/** Aspa. Quitar un filtro, cerrar. */
+export function IconoAspa(props: PropsIcono) {
+  return (
+    <svg {...envoltura(props)}>
+      {props.titulo ? <title>{props.titulo}</title> : null}
+      <path d="M6 6l12 12" />
+      <path d="M18 6 6 18" />
+    </svg>
+  );
+}
+
+/** Deshacer: flecha que vuelve sobre sus pasos. */
+export function IconoDeshacer(props: PropsIcono) {
+  return (
+    <svg {...envoltura(props)}>
+      {props.titulo ? <title>{props.titulo}</title> : null}
+      <path d="M3 8h9a6 6 0 1 1 0 12H7" />
+      <path d="M3 8l4-4" />
+      <path d="M3 8l4 4" />
+    </svg>
+  );
+}
+
+/** Escoba: dejar la búsqueda limpia. */
+export function IconoEscoba(props: PropsIcono) {
+  return (
+    <svg {...envoltura(props)}>
+      {props.titulo ? <title>{props.titulo}</title> : null}
+      <path d="M15.5 3.5 9 10" />
+      <path d="M13 8.5 6.5 15l4 4L17 12.5Z" />
+      <path d="M6.5 15 3 21l6-2" />
+    </svg>
+  );
+}
+
+/** Eslabón de cadena: enlace compartible. */
+export function IconoEnlace(props: PropsIcono) {
+  return (
+    <svg {...envoltura(props)}>
+      {props.titulo ? <title>{props.titulo}</title> : null}
+      <path d="M10.5 13.5a4 4 0 0 0 5.7 0l3-3a4 4 0 1 0-5.7-5.7l-1.7 1.7" />
+      <path d="M13.5 10.5a4 4 0 0 0-5.7 0l-3 3a4 4 0 1 0 5.7 5.7l1.7-1.7" />
+    </svg>
+  );
+}
+
+/** Reloj con la saeta hacia atrás: la colección histórica. */
+export function IconoReloj(props: PropsIcono) {
+  return (
+    <svg {...envoltura(props)}>
+      {props.titulo ? <title>{props.titulo}</title> : null}
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3.5 2" />
+    </svg>
+  );
+}
+
+/** Mapa: la localización del órgano. */
+export function IconoMapa(props: PropsIcono) {
+  return (
+    <svg {...envoltura(props)}>
+      {props.titulo ? <title>{props.titulo}</title> : null}
+      <path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11Z" />
+      <circle cx="12" cy="10" r="2.5" />
+    </svg>
+  );
+}
+
+/** Estrella: las colecciones que destaca el propio CGPJ. */
+export function IconoEstrella(props: PropsIcono) {
+  return (
+    <svg {...envoltura(props)}>
+      {props.titulo ? <title>{props.titulo}</title> : null}
+      <path d="m12 3.5 2.6 5.4 5.9.8-4.3 4.2 1.1 5.9-5.3-2.9-5.3 2.9 1.1-5.9L3.5 9.7l5.9-.8L12 3.5Z" />
+    </svg>
+  );
+}

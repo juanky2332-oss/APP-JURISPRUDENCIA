@@ -15,8 +15,20 @@ otra fuente. Si CENDOJ no lo devuelve, la aplicación no lo enseña.
 ## Qué hace
 
 - **Busca** por texto libre con los operadores del buscador oficial (`Y`, `O`, `NO`, `"frase exacta"`).
-- **Filtra** por jurisdicción, tipo de órgano, tipo de resolución, fechas, ponente, nº de recurso,
-  nº de resolución, legislación citada e idioma — todos ellos filtros reales del formulario del CGPJ.
+- **Filtra** por jurisdicción, tipo de órgano, localización (comunidad o provincia), tipo de resolución,
+  colecciones del CGPJ, fechas, ponente, nº de recurso, nº de resolución, legislación citada, sección,
+  solo Pleno e idioma — todos ellos filtros reales del formulario del CGPJ, ninguno inventado.
+- **Se quitan los filtros de uno en uno.** Lo que está aplicado se ve siempre en fichas bajo la caja de
+  búsqueda, con su aspa; hay «quitar todos», «deshacer», «copiar enlace» y «empezar de nuevo». Llegar a
+  una búsqueda compartida abre el panel con los filtros a la vista, en vez de acotar sin decir por qué.
+- **Cubre el histórico del Tribunal Supremo.** La base ordinaria del CENDOJ empieza en 1979 y lo anterior
+  está en otra colección que no aparece ni buscando por ECLI. La app la consulta sola cuando la ordinaria
+  se queda a cero, lo dice cuando lo hace y avisa cuando el rango de fechas cae en esos años.
+- **Dice hasta qué día llega la fuente.** El CGPJ publica con semanas de retraso; `/api/cobertura` lo mide
+  contra CENDOJ y la interfaz lo enseña con la fecha exacta, para que «esto no aparece» tenga respuesta.
+- **Cuando no hay resultados, ofrece salidas de un clic**: quitar los filtros, ampliar el rango, buscar en
+  el histórico, acortar la consulta o cambiar el orden. Ninguna reformula la consulta ni añade términos
+  jurídicos que no hayas escrito.
 - **Detecta identificadores**: si pegas un ECLI (`ECLI:ES:TS:2014:3877`) o un ROJ (`STS 1234/2020`) en
   la caja de búsqueda, consulta por identificador exacto en vez de por texto.
 - **Verifica**: cualquier resultado puede comprobarse contra CENDOJ por su ECLI. La interfaz distingue
@@ -72,6 +84,7 @@ cp .env.example .env.local
 | `npm run verify` | `typecheck` + `test`. Ejecútalo antes de desplegar. |
 | `npm run audit:cendoj` | **Auditoría en vivo de la fuente oficial** (ver más abajo). |
 | `npm run licencia -- --correo x@y.es` | Emite una licencia Pro y la comprueba antes de entregarla. |
+| `npm run boe:muestra` | Escribe en un HTML el correo del BOE que recibiría un cliente ese día. No envía nada ni toca la base de datos. |
 | `npm run probar:pro` | **Prueba del plan Pro de extremo a extremo** conduciendo un navegador real: activa la licencia, verifica un escrito contra CENDOJ, guarda en carpeta, exporta el dossier y comprueba la factura. Acepta una URL para probar producción. |
 
 ### `npm run audit:cendoj`
@@ -162,6 +175,104 @@ límite de peticiones por IP del servidor, que existe para no molestar a CENDOJ.
 
 ---
 
+## El boletín diario del BOE
+
+`/boe` enseña el sumario del día filtrado por materia, pero hay que entrar a mirarlo. Lo que
+se vende es lo contrario: **que llegue solo, cada mañana, a la bandeja del cliente**, con lo
+publicado en el BOE de las materias que trabaja. Si ese día no hay nada suyo, no se envía
+correo: un boletín que llega todos los días diciendo «hoy nada» se deja de abrir en dos
+semanas, y con él se dejan de abrir los días que sí traen algo.
+
+El correo no reescribe nada. El título de cada disposición es el que publica el BOE, palabra
+por palabra, y el enlace lleva al original —la misma regla que gobierna toda la aplicación.
+
+### Por qué esta parte sí tiene base de datos
+
+La promesa de «sin base de datos» es sobre CENDOJ: no se cachea ni se indexa jurisprudencia,
+y eso no cambia. Lo que se guarda aquí son datos nuestros —a quién le mandamos el correo y
+qué materias sigue—, y la fuente es otra: el BOE publica sus datos abiertos con una API
+pública, sin clave y pensada para ser reutilizada. No arrastra ninguna de las cautelas del
+CGPJ.
+
+Las tablas viven en el proyecto de Supabase compartido, con prefijo `fundalex_` para
+convivir con las de otros proyectos sin tocarlas. El esquema está en `sql/fundalex-boe.sql`
+y se ejecuta una vez en el SQL Editor. Llevan RLS activo y **sin políticas**: nadie llega a
+ellas con la clave pública; solo la `service_role`, que vive en el servidor y nunca se manda
+al navegador.
+
+### El panel de control (`/admin`)
+
+La trastienda. Da de alta a un cliente con su correo y sus materias, enseña el semáforo de
+lo que falta por configurar, y lleva el registro de lo que ha salido cada día. Dos botones
+son los que se usan delante de un cliente:
+
+- **Ver el correo de hoy** — abre en una pestaña el correo *exacto* que recibiría. No hay
+  que describirlo: se enseña.
+- **Enviar prueba** — manda ese mismo correo de verdad, marcado como prueba. Se puede
+  repetir las veces que haga falta sin gastar el envío del día.
+
+Se entra con `ADMIN_CLAVE`. La sesión es una cookie firmada de doce horas; no hay cuentas ni
+usuarios, porque el panel lo usa una persona.
+
+### El proceso de la mañana
+
+Lo dispara Vercel con un cron (`vercel.json` → `crons`) a las **07:00 UTC**: las 09:00 de
+Madrid en horario de verano, las 08:00 en invierno. Llama a `/api/cron/boe`, que pide el
+sumario **una sola vez** y lo filtra en memoria para cada suscriptor —veinte clientes no son
+veinte peticiones a un servicio público gratuito.
+
+Es idempotente: antes de empezar mira quién ya tiene boletín de ese día y se lo salta. El
+cron puede dispararse dos veces, o puedes pulsar «Lanzar el envío de hoy» después de que
+haya corrido, y nadie recibe el correo repetido. Un fallo con una dirección se anota y no
+para el reparto.
+
+Sin `CRON_SECRET` la ruta **no envía nada**: contesta 503 y lo explica, en vez de quedar
+abierta para que cualquiera dispare el envío a deshora.
+
+### El correo: remitente y baja
+
+Se envía con [Resend](https://resend.com) (3.000 correos al mes en el plan gratuito, 100 al
+día). Un aviso que cuesta un despliegue descubrir: **no se puede enviar «desde» una
+dirección de gmail.com**, ni con Resend ni con ningún otro proveedor. Para firmar un correo
+como tuyo hay que poner registros DNS en el dominio, y el DNS de gmail.com es de Google. Lo
+que sí se puede es enviar desde un dominio propio (`BOE_REMITENTE`) y poner el Gmail en
+`Responder a` (`BOE_RESPONDER_A`), de modo que las respuestas lleguen a la bandeja de
+siempre.
+
+Cada correo lleva enlace de baja, obligatorio por el artículo 21 de la LSSI y, sobre todo,
+lo que separa un boletín de un correo no deseado. Es un HMAC del correo con el mismo secreto
+que firma las licencias: no se puede fabricar para dar de baja a otro y no hay que guardar
+ningún testigo. Va además en la cabecera `List-Unsubscribe`, que es lo que hace que Gmail y
+Outlook enseñen su propio botón —y penalizan al remitente que no la pone.
+
+### Ver el correo sin configurar nada
+
+```bash
+npm run boe:muestra                                       # laboral y fiscal, hoy
+npm run boe:muestra -- --materias penal,procesal
+npm run boe:muestra -- --fecha 2026-08-27 --nombre Ana
+```
+
+Pide el sumario real al BOE, monta el correo igual que lo montaría el proceso de la mañana y
+lo escribe en `boletin-<fecha>.html` para abrirlo en el navegador. No toca la base de datos
+ni envía nada: sirve para enseñar el producto o revisar un cambio en la plantilla antes de
+haber configurado Supabase y Resend.
+
+### Puesta en marcha, en orden
+
+1. **Supabase** — ejecutar `sql/fundalex-boe.sql` en el SQL Editor del proyecto, y poner
+   `SUPABASE_URL` y `SUPABASE_SERVICE_ROLE_KEY` (la `service_role`, no la `anon`).
+2. **Resend** — crear la clave y ponerla en `RESEND_API_KEY`. Para escribir a clientes,
+   verificar el dominio y ajustar `BOE_REMITENTE`.
+3. **Cron** — generar `CRON_SECRET` y añadirlo al proyecto de Vercel.
+4. **Panel** — elegir `ADMIN_CLAVE` (mínimo 8 caracteres).
+5. Desplegar, entrar en `/admin` y comprobar que el semáforo está en verde.
+
+El semáforo del panel dice exactamente qué variable falta en cada paso: a las tres semanas
+ya no te acuerdas.
+
+---
+
 ## Rutas
 
 | Ruta | Qué es | ¿Se indexa? |
@@ -177,6 +288,8 @@ límite de peticiones por IP del servidor, que existe para no molestar a CENDOJ.
 | `/carpetas` | Carpetas de asunto y exportación del dossier. | No |
 | `/alertas` | Consultas vigiladas. | No |
 | `/factura` | Factura con IVA, generada desde la licencia. | No |
+| `/boe/baja` | Baja del boletín diario. Llega desde el pie de cada correo. | No |
+| `/admin` | Panel de control interno: alta de clientes del boletín y registro de envíos. | No |
 | `/api/*` | Endpoints JSON. Ver más abajo. | No |
 
 Las rutas están centralizadas en `lib/rutas.ts`: si una cambia, cambia ahí y no se queda ningún
@@ -194,10 +307,14 @@ Todos los endpoints son `GET` y devuelven JSON (salvo `/api/documento`, que devu
 
 | Endpoint | Descripción |
 | --- | --- |
-| `/api/buscar` | Búsqueda. Parámetros: `q`, `jurisdiccion`, `tipoOrgano`, `tipoResolucion` (repetible), `fechaDesde`, `fechaHasta` (AAAA-MM-DD), `ponente`, `numeroRecurso`, `numeroResolucion`, `norma`, `idioma`, `ecli`, `roj`, `orden`, `pagina`, `porPagina`. |
+| `/api/buscar` | Búsqueda. Parámetros: `q`, `jurisdiccion`, `tipoOrgano`, `localizacion`, `tipoResolucion` (repetible), `coleccion` (repetible), `fechaDesde`, `fechaHasta` (AAAA-MM-DD), `ponente`, `numeroRecurso`, `numeroResolucion`, `norma`, `idioma`, `seccion`, `seccionAuto`, `soloPleno`, `historico`, `ecli`, `roj`, `orden`, `pagina`, `porPagina`. |
+| `/api/cobertura` | Hasta qué fecha ha publicado CENDOJ, medido contra la fuente. Cacheado 6 h en memoria. |
 | `/api/verificar` | `?id=<ECLI o ROJ>`. Comprueba contra CENDOJ y devuelve `verificado` o `no_verificable`. |
 | `/api/documento` | `?id=<hex>&fecha=<AAAAMMDD>`. Sirve el PDF oficial. Si el CGPJ interpone su CAPTCHA, responde `409 FUENTE_REQUIERE_CAPTCHA` con `urlOficial` (o redirige a `/documento` si quien pide es un navegador). |
 | `/api/texto` | `?id=&fecha=&q=`. Fragmentos literales del PDF + metadatos internos del documento. |
+| `/api/cron/boe` | El reparto de la mañana. Lo llama Vercel con `Authorization: Bearer $CRON_SECRET`. |
+| `/api/boe/baja` | Baja en un clic (`POST`), la que ejecuta el botón propio de Gmail o de Outlook. |
+| `/api/admin/*` | Panel: sesión, suscriptores, envíos, vista previa y reparto manual. Exigen `ADMIN_CLAVE`. |
 | `/api/salud` | Estado de la integración: `operativo`, `degradado`, `limitado` (el CGPJ nos está aplicando su CAPTCHA) o `caido`. |
 
 Todas las respuestas de error tienen la misma forma:

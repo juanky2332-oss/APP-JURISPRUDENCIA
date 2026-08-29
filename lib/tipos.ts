@@ -77,7 +77,19 @@ export type ParametrosBusqueda = {
   /** Lista de tipos de resolución de CENDOJ (SENTENCIA, AUTO, …). */
   tiposResolucion?: string[];
   seccion?: string;
+  /** Sección de destino de los autos de admisión de casación contencioso-administrativa. */
+  seccionAuto?: string;
   soloPleno?: boolean;
+  /** Valor de VALUESCOMUNIDAD: «MURCIA(C)», «MÁLAGA(P)»… */
+  localizacion?: string;
+  /** Claves de las colecciones del CGPJ (interes, actualidad, igualdad…). */
+  colecciones?: string[];
+  /**
+   * Colección histórica del Tribunal Supremo (hasta 1978 inclusive). Es una
+   * base **distinta** de la ordinaria: sin esta bandera, una resolución
+   * anterior a 1979 no aparece ni buscándola por su ECLI.
+   */
+  historico?: boolean;
   ecli?: string;
   roj?: string;
   ponente?: string;
@@ -96,6 +108,11 @@ export type ParametrosBusqueda = {
 export type Aviso = {
   tipo: 'info' | 'atencion' | 'error';
   mensaje: string;
+  /**
+   * Identificador estable del aviso. La interfaz lo usa para no repetir en una
+   * línea lo que ya está explicando un panel entero.
+   */
+  clave?: string;
 };
 
 export type RespuestaBusqueda = {
@@ -109,6 +126,22 @@ export type RespuestaBusqueda = {
   porPagina: number;
   /** Consulta tal y como se envió a CENDOJ, para trazabilidad. */
   consultaEnviada: { url: string; parametros: Record<string, string> };
+  /**
+   * `true` si estos resultados salen de la colección histórica del Tribunal
+   * Supremo (hasta 1978). La interfaz lo dice, porque es otra base de datos.
+   */
+  historico: boolean;
+  /**
+   * `true` si la búsqueda ordinaria devolvió cero y la aplicación repitió sola
+   * la consulta en la colección histórica, que es donde sí estaba.
+   */
+  rescatadoDelHistorico: boolean;
+  /**
+   * `true` cuando la consulta apunta a años anteriores a 1979 y todavía no se
+   * está mirando en la colección histórica. La interfaz lo convierte en un
+   * botón, porque la base ordinaria no cubre esos años.
+   */
+  sugerirHistorico: boolean;
   avisos: Aviso[];
   sugerencias: string[];
   msTranscurridos: number;

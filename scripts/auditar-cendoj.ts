@@ -8,7 +8,7 @@
  * siendo ciertos. Es la herramienta que hay que ejecutar cuando la app empiece
  * a devolver fichas vacías: dirá exactamente qué ha cambiado.
  *
- * No descarga documentos ni recorre resultados en masa: son 8 peticiones.
+ * No descarga documentos ni recorre resultados en masa: son unas 20 peticiones.
  */
 
 import * as cheerio from 'cheerio';
@@ -112,6 +112,80 @@ async function auditarConsultas(): Promise<void> {
   );
 }
 
+/** Consulta con los parámetros crudos de CENDOJ, sin pasar por `construirParametros`. */
+async function sondaCruda(extra: Record<string, string>): Promise<{ total: number | null; n: number }> {
+  const params = { ...construirParametros({ porPagina: 10 }), ...extra };
+  const { html } = await obtenerHtml(urlBusqueda(params));
+  const { totalDeclarado, resoluciones } = parsearResultados(html);
+  await new Promise((r) => setTimeout(r, 1200));
+  return { total: totalDeclarado, n: resoluciones.length };
+}
+
+/**
+ * Comprobaciones de cobertura: los tres sitios donde la app daba por inexistente
+ * jurisprudencia que sí existe. Si alguna de estas falla, deja de ser un fallo
+ * de estilo: la aplicación estaría mintiendo a un letrado.
+ */
+async function auditarCobertura(): Promise<void> {
+  console.log(`\n${AMARILLO}3. Cobertura: que no se dé por inexistente lo que existe${FIN}`);
+
+  // 3.1 Tipo de resolución: las hojas del árbol viven en SUBTIPORESOLUCION.
+  const porSubtipo = await sondaCruda({ TEXT: 'despido', SUBTIPORESOLUCION: 'SENTENCIA CASACION' });
+  comprobar(
+    'Las hojas del tipo de resolución buscan por SUBTIPORESOLUCION',
+    (porSubtipo.total ?? 0) > 0,
+    `total=${porSubtipo.total ?? 'null'}`,
+  );
+
+  const porTipo = await sondaCruda({ TEXT: 'despido', TIPORESOLUCION: 'SENTENCIA CASACION' });
+  comprobar(
+    'Y por TIPORESOLUCION siguen sin buscar (por eso se reparten)',
+    porTipo.n === 0,
+    `devueltos=${porTipo.n}`,
+  );
+
+  const ramaAncha = await sondaCruda({ TEXT: 'despido', TIPORESOLUCION: 'SENTENCIA' });
+  comprobar('La rama ancha sí busca por TIPORESOLUCION', (ramaAncha.total ?? 0) > 0, `total=${ramaAncha.total ?? 'null'}`);
+
+  // 3.2 Colección histórica: la base ordinaria no llega antes de 1979.
+  const sinHistorico = await sonda(
+    'Una resolución anterior a 1979 NO aparece en la base ordinaria',
+    { roj: 'STS 37/1868', porPagina: 10 },
+    (_t, n) => n === 0,
+  );
+  void sinHistorico;
+
+  await sonda(
+    'Y sí aparece pidiendo la colección histórica del TS',
+    { roj: 'STS 37/1868', historico: true, porPagina: 10 },
+    (_t, n) => n === 1,
+  );
+
+  // 3.3 Filtros nuevos que amplían lo que se puede acotar sin perder cobertura.
+  const localizacion = await sonda(
+    'El filtro de localización (VALUESCOMUNIDAD) se aplica',
+    { texto: 'despido', localizacion: 'MURCIA(C)', porPagina: 10 },
+    (t) => (t ?? 0) > 0,
+  );
+  void localizacion;
+
+  await sonda(
+    'Las colecciones del CGPJ (Interés TS) se aplican',
+    { texto: 'despido', colecciones: ['interes'], porPagina: 10 },
+    (t) => (t ?? 0) > 0,
+  );
+
+  // 3.4 Combinaciones que CENDOJ rechaza: tienen que seguir rechazándose, o la
+  // advertencia que da la app sobraría y estaría estorbando.
+  let rechazada = false;
+  try {
+    await sondaCruda({ JURISDICCION: 'SOCIAL' });
+  } catch {
+    rechazada = true;
+  }
+  comprobar('CENDOJ sigue rechazando una jurisdicción como único criterio', rechazada);
+}
+
 async function principal(): Promise<void> {
   console.log(`${AMARILLO}Auditoría de la integración con CENDOJ${FIN}`);
   console.log(`${GRIS}Fuente: Consejo General del Poder Judicial — poderjudicial.es${FIN}`);
@@ -119,6 +193,7 @@ async function principal(): Promise<void> {
   try {
     await auditarFormulario();
     await auditarConsultas();
+    await auditarCobertura();
   } catch (e) {
     console.error(`\n${ROJO}La auditoría no ha podido completarse:${FIN}`, e instanceof Error ? e.message : e);
     process.exitCode = 1;

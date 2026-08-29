@@ -608,6 +608,282 @@ button:disabled {
   gap: 12px;
   flex-wrap: wrap;
   margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px dashed var(--borde-fuerte);
+}
+
+.acciones-filtros-botones {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* ------------------------------------------------- filtros activos (fichas) */
+
+/*
+ * La barra de filtros aplicados. Está fuera del panel avanzado a propósito:
+ * lo que acota la búsqueda tiene que verse aunque el panel esté cerrado, y
+ * quitarse de uno en uno sin abrirlo.
+ */
+.filtros-activos {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--borde-fuerte);
+}
+
+.filtros-activos-titulo {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--texto-tenue);
+}
+
+.lista-fichas-filtro {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ficha-filtro {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 10px 5px 11px;
+  font-size: 12.5px;
+  color: var(--acento);
+  background: var(--acento-suave);
+  border: 1px solid color-mix(in srgb, var(--acento) 35%, transparent);
+  border-radius: 999px;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.ficha-filtro:hover {
+  background: color-mix(in srgb, var(--acento) 16%, var(--superficie));
+  border-color: var(--acento);
+}
+
+.ficha-filtro-campo {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.72;
+}
+
+.ficha-filtro-valor {
+  font-weight: 550;
+  max-width: 30ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ficha-filtro svg {
+  flex: none;
+  opacity: 0.75;
+}
+
+.ficha-filtro:hover svg {
+  opacity: 1;
+}
+
+/* Contador de filtros sobre el botón que abre el panel. */
+.btn-filtros.con-filtros {
+  color: var(--acento);
+  background: var(--acento-suave);
+  border-color: color-mix(in srgb, var(--acento) 30%, transparent);
+}
+
+.contador-filtros {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 19px;
+  height: 19px;
+  padding: 0 5px;
+  font-size: 11.5px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--superficie);
+  background: var(--acento);
+  border-radius: 999px;
+}
+
+/* Aspa para vaciar un campo concreto. */
+.btn-vaciar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  color: var(--texto-tenue);
+  background: none;
+  border: none;
+  border-radius: 999px;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.btn-vaciar:hover {
+  color: var(--rojo);
+  background: var(--rojo-tenue);
+}
+
+.btn-vaciar-caja {
+  position: absolute;
+  right: 12px;
+  padding: 5px;
+}
+
+.campo-busqueda input[type='search'] {
+  padding-right: 38px;
+}
+
+/* -------------------------------------------------- panel de filtros por bloques */
+
+.panel-filtros {
+  margin-top: 18px;
+  padding-top: 6px;
+  border-top: 1px dashed var(--borde-fuerte);
+}
+
+.grupo-filtros {
+  margin: 0;
+  padding: 14px 0 4px;
+  border: none;
+  border-bottom: 1px solid var(--borde);
+}
+
+.grupo-filtros:last-of-type {
+  border-bottom: none;
+}
+
+.grupo-filtros legend {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0;
+  font-family: var(--serif);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--texto);
+}
+
+.grupo-filtros legend svg {
+  color: var(--acento);
+}
+
+.grupo-filtros .rejilla-filtros {
+  margin-top: 12px;
+  padding-top: 0;
+  border-top: none;
+}
+
+.campo-filtro {
+  min-width: 0;
+}
+
+.campo-filtro-cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.campo-filtro-cabecera label {
+  margin-bottom: 5px;
+}
+
+.pista-campo {
+  display: block;
+  margin-top: 5px;
+  line-height: 1.4;
+}
+
+.check-ancho {
+  display: inline-flex;
+  margin-top: 12px;
+}
+
+/* Árbol de tipos de resolución: el mismo sangrado que el formulario del CGPJ. */
+.arbol-tipos {
+  margin-top: 12px;
+}
+
+.arbol-tipos .nivel-1 {
+  margin-left: 14px;
+}
+
+.arbol-tipos .nivel-2 {
+  margin-left: 28px;
+}
+
+.atajos-fecha {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 12px;
+}
+
+/* ----------------------------------------------------- rescates sin resultados */
+
+.estado-sin-resultados {
+  padding: 32px 26px;
+}
+
+.estado-sin-resultados > p {
+  max-width: 62ch;
+  margin-inline: auto;
+  text-align: left;
+}
+
+.rescates {
+  display: grid;
+  gap: 8px;
+  margin: 18px 0 14px;
+  padding: 0;
+  list-style: none;
+}
+
+.rescate {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  width: 100%;
+  padding: 12px 15px !important;
+  text-align: left;
+}
+
+.rescate-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.rescate-texto strong {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--texto);
+}
+
+.rescate-texto span {
+  font-size: 12.8px;
+  font-weight: 400;
+  line-height: 1.45;
+  color: var(--texto-tenue);
+}
+
+.rescate svg {
+  flex: none;
+  color: var(--acento);
 }
 
 .pista {
@@ -673,6 +949,20 @@ button:disabled {
   color: var(--rojo);
   background: var(--rojo-tenue);
   border-color: color-mix(in srgb, var(--rojo) 40%, transparent);
+}
+
+/* Aviso con una salida: el botón va a la derecha y no se parte en móvil. */
+.aviso-accionable {
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.aviso-accionable > span {
+  flex: 1 1 320px;
+}
+
+.aviso-accionable button {
+  flex: none;
 }
 
 .aviso strong {
@@ -3796,4 +4086,495 @@ kbd {
    automático corte donde caiga, que dejaba la coma colgando al final de línea. */
 .hero h1 span {
   display: block;
+}
+
+/* ---------------------------------------------------------------------------
+   Panel de control (/admin) y baja del boletín.
+
+   Es la trastienda: la usa una persona, en un portátil, para dar de alta a un
+   cliente y comprobar que le llega el correo. No lleva la carga tipográfica de
+   la portada —aquí manda la densidad de información— pero sí los mismos
+   colores, para que no parezca otra aplicación.
+   --------------------------------------------------------------------------- */
+
+.nota-menor {
+  font-size: 0.86rem;
+  line-height: 1.6;
+  color: var(--texto-tenue);
+}
+
+.adm-cabecera {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.adm-cargando {
+  color: var(--texto-tenue);
+  font-size: 0.95rem;
+}
+
+.adm-titulo {
+  font-family: var(--sans);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--acento);
+  margin: 0 0 18px;
+}
+
+/* --- botones --- */
+.adm-boton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 9px 16px;
+  border: 1px solid var(--borde-fuerte);
+  border-radius: var(--radio-s);
+  background: var(--superficie);
+  color: var(--texto);
+  font-family: var(--sans);
+  font-size: 0.9rem;
+  font-weight: 500;
+  line-height: 1.2;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.adm-boton:hover:not(:disabled) {
+  border-color: var(--acento);
+  color: var(--acento);
+}
+
+.adm-boton:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.adm-boton-principal {
+  background: var(--acento);
+  border-color: var(--acento);
+  color: var(--papel-alto);
+  font-weight: 600;
+}
+
+.adm-boton-principal:hover:not(:disabled) {
+  background: var(--sello-claro);
+  border-color: var(--sello-claro);
+  color: var(--papel-alto);
+}
+
+.adm-boton-menor {
+  padding: 6px 12px;
+  font-size: 0.82rem;
+}
+
+.adm-boton-riesgo:hover:not(:disabled) {
+  border-color: var(--rojo);
+  color: var(--rojo);
+}
+
+/* --- entrada --- */
+.adm-entrada {
+  max-width: 460px;
+}
+
+.adm-form-entrada {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.adm-form-entrada label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--texto-suave);
+}
+
+.adm-form-entrada input {
+  padding: 11px 13px;
+  border: 1px solid var(--borde-fuerte);
+  border-radius: var(--radio-s);
+  background: var(--fondo);
+  color: var(--texto);
+  font-family: var(--sans);
+  font-size: 1rem;
+}
+
+.adm-form-entrada input:focus-visible {
+  outline: 2px solid var(--acento);
+  outline-offset: 1px;
+}
+
+/* --- semáforo de configuración --- */
+.adm-semaforo {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.adm-luz {
+  border: 1px solid var(--borde);
+  border-left-width: 3px;
+  border-radius: var(--radio-s);
+  padding: 12px 14px;
+  background: var(--fondo);
+}
+
+.adm-luz-ok {
+  border-left-color: var(--verde);
+}
+
+.adm-luz-falta {
+  border-left-color: var(--ambar);
+  background: var(--ambar-tenue);
+}
+
+.adm-luz-titulo {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--texto-tenue);
+}
+
+.adm-luz-texto {
+  margin: 5px 0 0;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--texto-suave);
+}
+
+.adm-luz-ancha {
+  grid-column: 1 / -1;
+}
+
+/* --- resumen --- */
+.adm-resumen {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 20px 28px;
+}
+
+.adm-cifras {
+  display: flex;
+  gap: 28px;
+}
+
+.adm-cifra {
+  display: flex;
+  flex-direction: column;
+}
+
+.adm-cifra strong {
+  font-family: var(--serif);
+  font-size: 1.9rem;
+  line-height: 1;
+  color: var(--texto);
+}
+
+.adm-cifra span {
+  margin-top: 4px;
+  font-size: 0.76rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--texto-tenue);
+}
+
+.adm-acciones {
+  display: flex;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.adm-resumen .nota-menor {
+  flex-basis: 100%;
+  margin: 0;
+}
+
+/* --- mensajes --- */
+.adm-error,
+.adm-aviso {
+  margin: 0 0 18px;
+  padding: 11px 14px;
+  border-radius: var(--radio-s);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.adm-error {
+  background: var(--rojo-tenue);
+  color: var(--rojo);
+  border: 1px solid var(--rojo);
+}
+
+.adm-aviso {
+  background: var(--verde-tenue);
+  color: var(--verde);
+  border: 1px solid var(--verde);
+}
+
+/* --- formulario --- */
+.adm-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.adm-campos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.adm-form label,
+.adm-campo-ancho {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.adm-form label > span,
+.adm-materias-campo legend {
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: var(--texto-suave);
+}
+
+.adm-form input[type="text"],
+.adm-form input[type="email"],
+.adm-form textarea {
+  padding: 9px 12px;
+  border: 1px solid var(--borde-fuerte);
+  border-radius: var(--radio-s);
+  background: var(--fondo);
+  color: var(--texto);
+  font-family: var(--sans);
+  font-size: 0.95rem;
+  width: 100%;
+}
+
+.adm-form textarea {
+  resize: vertical;
+}
+
+.adm-form input:focus-visible,
+.adm-form textarea:focus-visible {
+  outline: 2px solid var(--acento);
+  outline-offset: 1px;
+}
+
+.adm-materias-campo {
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+
+.adm-materias-campo legend {
+  padding: 0;
+  margin-bottom: 8px;
+}
+
+.adm-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.adm-form-pie {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+/* Va con el selector completo porque `.adm-form label` ya fija columna y
+   ganaría por especificidad: el interruptor es la única etiqueta en fila. */
+.adm-form label.adm-interruptor {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: var(--texto-suave);
+  cursor: pointer;
+}
+
+.adm-interruptor input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--acento);
+}
+
+/* --- fichas --- */
+.adm-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.adm-ficha {
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  padding: 15px 17px;
+  background: var(--fondo);
+}
+
+.adm-ficha-inactiva {
+  opacity: 0.62;
+}
+
+.adm-ficha-cabecera {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.adm-correo {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--texto);
+  word-break: break-all;
+}
+
+.adm-meta {
+  margin: 3px 0 0;
+  font-size: 0.8rem;
+  color: var(--texto-tenue);
+}
+
+.adm-materias {
+  margin: 9px 0 0;
+  font-size: 0.88rem;
+  color: var(--acento);
+  font-weight: 500;
+}
+
+.adm-notas {
+  margin: 8px 0 0;
+  padding-left: 10px;
+  border-left: 2px solid var(--borde);
+  font-size: 0.85rem;
+  color: var(--texto-suave);
+  font-style: italic;
+}
+
+.adm-estado {
+  flex-shrink: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 3px 9px;
+  border-radius: 999px;
+}
+
+.adm-estado-si {
+  background: var(--verde-tenue);
+  color: var(--verde);
+}
+
+.adm-estado-no {
+  background: var(--piedra);
+  color: var(--texto-tenue);
+}
+
+.adm-ficha-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 13px;
+}
+
+.adm-editor {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--borde);
+}
+
+/* --- registro de envíos --- */
+.adm-sello {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  padding: 2px 7px;
+  border-radius: var(--radio-s);
+  background: var(--piedra);
+  color: var(--texto-suave);
+}
+
+.adm-sello-enviado {
+  background: var(--verde-tenue);
+  color: var(--verde);
+}
+
+.adm-sello-error {
+  background: var(--rojo-tenue);
+  color: var(--rojo);
+}
+
+.adm-sello-prueba {
+  background: var(--acento-suave);
+  color: var(--acento);
+}
+
+.adm-detalle-error {
+  font-size: 0.78rem;
+  color: var(--rojo);
+}
+
+@media (max-width: 620px) {
+  .adm-acciones {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .adm-acciones .adm-boton {
+    flex: 1;
+  }
+}
+
+/* ------------------------------------------------------ cobertura de la fuente */
+
+/*
+ * Hasta qué día ha publicado CENDOJ. Va bajo la caja de búsqueda porque es lo
+ * que contesta a la sospecha de que la aplicación esté desactualizada.
+ */
+.cobertura {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 12px 0 0;
+  font-size: 12.8px;
+  color: var(--texto-suave);
+}
+
+.cobertura svg {
+  flex: none;
+  margin-top: 2px;
+  color: var(--bronce);
+}
+
+.cobertura strong {
+  font-weight: 650;
+  color: var(--texto);
+}
+
+.cobertura .pista {
+  display: block;
+  margin-top: 2px;
+  line-height: 1.45;
 }

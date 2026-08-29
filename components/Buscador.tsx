@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { TarjetaResultado } from './TarjetaResultado';
 import { BotonOficial } from './BotonOficial';
 import {
+  IconoAspa,
   IconoAviso,
   IconoBalanza,
   IconoColumna,
@@ -12,113 +13,30 @@ import {
   IconoFlecha,
   IconoLupa,
   IconoMazo,
+  IconoReloj,
   IconoSello,
 } from './Iconos';
 import { normalizarConsulta } from '@/lib/consulta';
 import { guardarContexto } from '@/lib/navegacion';
 import { RUTAS, enlaceBuscador } from '@/lib/rutas';
 import {
-  IDIOMAS,
-  JURISDICCIONES,
-  ORDENES,
-  RESULTADOS_POR_PAGINA,
-  TIPOS_ORGANO,
-  TIPOS_RESOLUCION,
-} from '@/lib/cendoj/catalogos';
+  aParametros,
+  contarFiltros,
+  desdeParametros,
+  hayCriterios,
+  soloTexto,
+  FORMULARIO_VACIO,
+  type Formulario,
+} from '@/lib/filtros';
 import type { RespuestaBusqueda, RespuestaError } from '@/lib/tipos';
 import { VigilarConsulta } from './pro/VigilarConsulta';
 import { PreguntaNatural, type FiltrosTraducidos } from './pro/PreguntaNatural';
-
-type Formulario = {
-  q: string;
-  jurisdiccion: string;
-  tipoOrgano: string;
-  tiposResolucion: string[];
-  ponente: string;
-  numeroRecurso: string;
-  numeroResolucion: string;
-  norma: string;
-  idioma: string;
-  fechaDesde: string;
-  fechaHasta: string;
-  orden: string;
-  porPagina: string;
-};
-
-const VACIO: Formulario = {
-  q: '',
-  jurisdiccion: '',
-  tipoOrgano: '',
-  tiposResolucion: [],
-  ponente: '',
-  numeroRecurso: '',
-  numeroResolucion: '',
-  norma: '',
-  idioma: '',
-  fechaDesde: '',
-  fechaHasta: '',
-  orden: 'Relevance',
-  porPagina: '10',
-};
+import { Cobertura } from './buscador/Cobertura';
+import { FiltrosActivos } from './buscador/FiltrosActivos';
+import { PanelFiltros } from './buscador/PanelFiltros';
+import { SinResultados } from './buscador/SinResultados';
 
 const CLAVE_HISTORIAL = 'jurisprudencia:historial';
-
-function desdeUrl(sp: URLSearchParams): Formulario {
-  return {
-    ...VACIO,
-    q: sp.get('q') ?? '',
-    jurisdiccion: sp.get('jurisdiccion') ?? '',
-    tipoOrgano: sp.get('tipoOrgano') ?? '',
-    tiposResolucion: sp.getAll('tipoResolucion'),
-    ponente: sp.get('ponente') ?? '',
-    numeroRecurso: sp.get('numeroRecurso') ?? '',
-    numeroResolucion: sp.get('numeroResolucion') ?? '',
-    norma: sp.get('norma') ?? '',
-    idioma: sp.get('idioma') ?? '',
-    fechaDesde: sp.get('fechaDesde') ?? '',
-    fechaHasta: sp.get('fechaHasta') ?? '',
-    orden: sp.get('orden') ?? 'Relevance',
-    porPagina: sp.get('porPagina') ?? '10',
-  };
-}
-
-function aParametros(f: Formulario, pagina: number): URLSearchParams {
-  const p = new URLSearchParams();
-  const poner = (k: string, v: string) => {
-    if (v.trim() !== '') p.set(k, v.trim());
-  };
-  poner('q', f.q);
-  poner('jurisdiccion', f.jurisdiccion);
-  poner('tipoOrgano', f.tipoOrgano);
-  poner('ponente', f.ponente);
-  poner('numeroRecurso', f.numeroRecurso);
-  poner('numeroResolucion', f.numeroResolucion);
-  poner('norma', f.norma);
-  poner('idioma', f.idioma);
-  poner('fechaDesde', f.fechaDesde);
-  poner('fechaHasta', f.fechaHasta);
-  poner('orden', f.orden);
-  poner('porPagina', f.porPagina);
-  for (const t of f.tiposResolucion) p.append('tipoResolucion', t);
-  if (pagina > 1) p.set('pagina', String(pagina));
-  return p;
-}
-
-function hayCriterios(f: Formulario): boolean {
-  return (
-    [
-      f.q,
-      f.jurisdiccion,
-      f.tipoOrgano,
-      f.ponente,
-      f.numeroRecurso,
-      f.numeroResolucion,
-      f.norma,
-      f.fechaDesde,
-      f.fechaHasta,
-    ].some((v) => v.trim() !== '') || f.tiposResolucion.length > 0
-  );
-}
 
 /** Extrae id y fecha del enlace al proxy para poder reconstruir la ficha. */
 function partesDocumento(urlProxy: string | null): { id: string | null; fecha: string | null } {
@@ -130,14 +48,22 @@ export function Buscador() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const [formulario, setFormulario] = useState<Formulario>(() => desdeUrl(new URLSearchParams(searchParams.toString())));
+  const [formulario, setFormulario] = useState<Formulario>(() =>
+    desdeParametros(new URLSearchParams(searchParams.toString())),
+  );
   const [pagina, setPagina] = useState<number>(() => Number.parseInt(searchParams.get('pagina') ?? '1', 10) || 1);
-  const [avanzada, setAvanzada] = useState(false);
+  // El panel arranca abierto si la URL ya traía filtros: llegar a una búsqueda
+  // compartida y no ver por qué está acotada era la mitad del problema.
+  const [avanzada, setAvanzada] = useState(
+    () => contarFiltros(desdeParametros(new URLSearchParams(searchParams.toString()))) > 0,
+  );
   const [cargando, setCargando] = useState(false);
   const [datos, setDatos] = useState<RespuestaBusqueda | null>(null);
   const [fallo, setFallo] = useState<RespuestaError | null>(null);
   const [historial, setHistorial] = useState<string[]>([]);
   const [buscado, setBuscado] = useState(false);
+  const [anterior, setAnterior] = useState<Formulario | null>(null);
+  const [enlaceCopiado, setEnlaceCopiado] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
@@ -150,6 +76,7 @@ export function Buscador() {
   }, []);
 
   const terminos = useMemo(() => normalizarConsulta(formulario.q).terminos, [formulario.q]);
+  const numeroFiltros = contarFiltros(formulario);
 
   const ejecutar = useCallback(
     async (f: Formulario, paginaSolicitada: number) => {
@@ -178,6 +105,13 @@ export function Buscador() {
           setDatos(null);
         } else {
           setDatos(cuerpo);
+
+          // Si CENDOJ ha rescatado los resultados de la colección histórica, el
+          // formulario refleja dónde se ha buscado de verdad. Que la casilla no
+          // dijera lo mismo que los resultados sería mentir por omisión.
+          if (cuerpo.rescatadoDelHistorico && !f.historico) {
+            setFormulario((actual) => ({ ...actual, historico: true }));
+          }
 
           // Se guarda la lista para poder saltar entre fichas con las flechas.
           guardarContexto({
@@ -223,21 +157,64 @@ export function Buscador() {
   useEffect(() => {
     if (yaLanzado.current) return;
     yaLanzado.current = true;
-    const inicial = desdeUrl(new URLSearchParams(searchParams.toString()));
+    const inicial = desdeParametros(new URLSearchParams(searchParams.toString()));
     if (hayCriterios(inicial)) void ejecutar(inicial, pagina);
   }, [ejecutar, pagina, searchParams]);
 
-  function actualizar<K extends keyof Formulario>(clave: K, valor: Formulario[K]) {
-    setFormulario((f) => ({ ...f, [clave]: valor }));
+  /**
+   * Cambia el formulario y busca con él, guardando el anterior para deshacer.
+   * Todas las acciones de un clic —quitar una ficha, aplicar un rescate, vaciar
+   * los filtros— pasan por aquí, así que cualquiera de ellas se puede revertir.
+   */
+  const aplicar = useCallback(
+    (siguiente: Formulario, { recordar = true }: { recordar?: boolean } = {}) => {
+      if (recordar) setAnterior(formulario);
+      setFormulario(siguiente);
+      setPagina(1);
+      if (hayCriterios(siguiente)) {
+        void ejecutar(siguiente, 1);
+      } else {
+        setDatos(null);
+        setFallo(null);
+        setBuscado(false);
+        router.replace(RUTAS.buscador, { scroll: false });
+      }
+    },
+    [ejecutar, formulario, router],
+  );
+
+  /** Edita el formulario sin buscar todavía (lo que se teclea en el panel). */
+  function editar(siguiente: Formulario) {
+    setFormulario(siguiente);
   }
 
-  function alternarTipo(valor: string) {
-    setFormulario((f) => ({
-      ...f,
-      tiposResolucion: f.tiposResolucion.includes(valor)
-        ? f.tiposResolucion.filter((t) => t !== valor)
-        : [...f.tiposResolucion, valor],
-    }));
+  function deshacer() {
+    if (!anterior) return;
+    const volver = anterior;
+    setAnterior(null);
+    setFormulario(volver);
+    setPagina(1);
+    if (hayCriterios(volver)) void ejecutar(volver, 1);
+  }
+
+  function empezarDeNuevo() {
+    setAnterior(formulario);
+    setFormulario(FORMULARIO_VACIO);
+    setPagina(1);
+    setDatos(null);
+    setFallo(null);
+    setBuscado(false);
+    router.replace(RUTAS.buscador, { scroll: false });
+  }
+
+  async function copiarEnlace() {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setEnlaceCopiado(true);
+      window.setTimeout(() => setEnlaceCopiado(false), 2200);
+    } catch {
+      /* sin portapapeles no pasa nada: la URL está en la barra de direcciones */
+    }
   }
 
   /**
@@ -247,7 +224,7 @@ export function Buscador() {
    * se respeta la suya.
    */
   function aplicarTraduccion(f: FiltrosTraducidos) {
-    const siguiente: Formulario = {
+    aplicar({
       ...formulario,
       q: f.q,
       jurisdiccion: f.jurisdiccion ?? formulario.jurisdiccion,
@@ -256,25 +233,13 @@ export function Buscador() {
       fechaDesde: f.fechaDesde ?? formulario.fechaDesde,
       fechaHasta: f.fechaHasta ?? formulario.fechaHasta,
       ponente: f.ponente ?? formulario.ponente,
-    };
-    setFormulario(siguiente);
-    setPagina(1);
-    void ejecutar(siguiente, 1);
-  }
-
-  function limpiar() {
-    setFormulario(VACIO);
-    setPagina(1);
-    setDatos(null);
-    setFallo(null);
-    setBuscado(false);
-    router.replace(RUTAS.buscador, { scroll: false });
+    });
+    setAvanzada(true);
   }
 
   function enviar(e: React.FormEvent) {
     e.preventDefault();
-    setPagina(1);
-    void ejecutar(formulario, 1);
+    aplicar(formulario, { recordar: false });
   }
 
   const porPagina = datos?.porPagina ?? Number.parseInt(formulario.porPagina, 10);
@@ -359,139 +324,61 @@ export function Buscador() {
               aria-label="Términos de búsqueda, ECLI o ROJ"
               placeholder='Términos, ECLI (ECLI:ES:TS:2014:3877) o ROJ (STS 1234/2020). Operadores: Y, O, NO y "frase exacta"'
               value={formulario.q}
-              onChange={(e) => actualizar('q', e.target.value)}
+              onChange={(e) => setFormulario((f) => ({ ...f, q: e.target.value }))}
             />
+            {formulario.q !== '' ? (
+              <button
+                type="button"
+                className="btn-vaciar btn-vaciar-caja"
+                onClick={() => setFormulario((f) => ({ ...f, q: '' }))}
+                title="Vaciar el texto de la búsqueda"
+              >
+                <IconoAspa tamano={13} />
+                <span className="oculto-visual">Vaciar el texto</span>
+              </button>
+            ) : null}
           </div>
           <button type="submit" className="btn-principal" disabled={cargando}>
             <IconoMazo tamano={17} />
             {cargando ? 'Consultando CENDOJ…' : 'Buscar'}
           </button>
-          <button type="button" className="btn-texto" onClick={() => setAvanzada((v) => !v)} aria-expanded={avanzada}>
+          <button
+            type="button"
+            className={`btn-texto btn-filtros${numeroFiltros > 0 ? ' con-filtros' : ''}`}
+            onClick={() => setAvanzada((v) => !v)}
+            aria-expanded={avanzada}
+          >
             <IconoFiltro tamano={15} />
-            {avanzada ? 'Ocultar filtros' : 'Búsqueda avanzada'}
+            {avanzada ? 'Ocultar filtros' : 'Filtros'}
+            {numeroFiltros > 0 ? <span className="contador-filtros">{numeroFiltros}</span> : null}
           </button>
+          {buscado || numeroFiltros > 0 || formulario.q !== '' ? (
+            <button type="button" className="btn-texto" onClick={empezarDeNuevo}>
+              <IconoAspa tamano={14} />
+              Empezar de nuevo
+            </button>
+          ) : null}
         </div>
 
+        <FiltrosActivos
+          formulario={formulario}
+          hayQueDeshacer={anterior !== null}
+          onCambiar={(f) => aplicar(f)}
+          onQuitarTodos={() => aplicar(soloTexto(formulario))}
+          onDeshacer={deshacer}
+          onCopiarEnlace={() => void copiarEnlace()}
+          enlaceCopiado={enlaceCopiado}
+        />
+
+        <Cobertura />
+
         {avanzada ? (
-          <>
-            <div className="rejilla-filtros">
-              <div>
-                <label htmlFor="f-jurisdiccion">Jurisdicción</label>
-                <select
-                  id="f-jurisdiccion"
-                  value={formulario.jurisdiccion}
-                  onChange={(e) => actualizar('jurisdiccion', e.target.value)}
-                >
-                  <option value="">Todas</option>
-                  {JURISDICCIONES.map((j) => (
-                    <option key={j.valor} value={j.valor}>
-                      {j.etiqueta}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div style={{ gridColumn: 'span 2' }}>
-                <label htmlFor="f-organo">Tipo de órgano</label>
-                <select id="f-organo" value={formulario.tipoOrgano} onChange={(e) => actualizar('tipoOrgano', e.target.value)}>
-                  <option value="">Todos</option>
-                  {TIPOS_ORGANO.map((o) => (
-                    <option key={o.valor} value={o.valor}>
-                      {o.etiqueta}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label htmlFor="f-desde">Fecha desde</label>
-                <input id="f-desde" type="date" value={formulario.fechaDesde} onChange={(e) => actualizar('fechaDesde', e.target.value)} />
-              </div>
-
-              <div>
-                <label htmlFor="f-hasta">Fecha hasta</label>
-                <input id="f-hasta" type="date" value={formulario.fechaHasta} onChange={(e) => actualizar('fechaHasta', e.target.value)} />
-              </div>
-
-              <div>
-                <label htmlFor="f-ponente">Ponente</label>
-                <input id="f-ponente" value={formulario.ponente} onChange={(e) => actualizar('ponente', e.target.value)} placeholder="Apellidos" />
-              </div>
-
-              <div>
-                <label htmlFor="f-recurso">Nº de recurso</label>
-                <input id="f-recurso" value={formulario.numeroRecurso} onChange={(e) => actualizar('numeroRecurso', e.target.value)} />
-              </div>
-
-              <div>
-                <label htmlFor="f-resolucion">Nº de resolución</label>
-                <input id="f-resolucion" value={formulario.numeroResolucion} onChange={(e) => actualizar('numeroResolucion', e.target.value)} />
-              </div>
-
-              <div>
-                <label htmlFor="f-norma">Legislación citada</label>
-                <input id="f-norma" value={formulario.norma} onChange={(e) => actualizar('norma', e.target.value)} placeholder="p. ej. LEC" />
-              </div>
-
-              <div>
-                <label htmlFor="f-idioma">Idioma</label>
-                <select id="f-idioma" value={formulario.idioma} onChange={(e) => actualizar('idioma', e.target.value)}>
-                  {IDIOMAS.map((i) => (
-                    <option key={i.valor} value={i.valor}>
-                      {i.etiqueta}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label htmlFor="f-orden">Ordenar por</label>
-                <select id="f-orden" value={formulario.orden} onChange={(e) => actualizar('orden', e.target.value)}>
-                  {ORDENES.map((o) => (
-                    <option key={o.valor} value={o.valor}>
-                      {o.etiqueta}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label htmlFor="f-porpagina">Resultados por página</label>
-                <select id="f-porpagina" value={formulario.porPagina} onChange={(e) => actualizar('porPagina', e.target.value)}>
-                  {RESULTADOS_POR_PAGINA.map((n) => (
-                    <option key={n} value={String(n)}>
-                      {n}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div style={{ gridColumn: '1 / -1' }}>
-                <label>Tipo de resolución</label>
-                <div className="grupo-checks">
-                  {TIPOS_RESOLUCION.map((t) => (
-                    <label className="check" key={t.valor}>
-                      <input
-                        type="checkbox"
-                        checked={formulario.tiposResolucion.includes(t.valor)}
-                        onChange={() => alternarTipo(t.valor)}
-                      />
-                      {t.etiqueta}
-                    </label>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <div className="acciones-filtros">
-              <span className="pista">
-                Todos estos filtros existen en el formulario oficial de CENDOJ y se le envían tal cual.
-              </span>
-              <button type="button" onClick={limpiar}>
-                Limpiar filtros
-              </button>
-            </div>
-          </>
+          <PanelFiltros
+            formulario={formulario}
+            onCambiar={editar}
+            onAplicar={() => aplicar(formulario, { recordar: false })}
+            onQuitarTodos={() => aplicar(soloTexto(formulario))}
+          />
         ) : null}
       </form>
 
@@ -499,17 +386,7 @@ export function Buscador() {
         <div className="historial">
           <span className="pista">Esta sesión:</span>
           {historial.map((h) => (
-            <button
-              key={h}
-              type="button"
-              className="chip"
-              onClick={() => {
-                const siguiente = { ...formulario, q: h };
-                setFormulario(siguiente);
-                setPagina(1);
-                void ejecutar(siguiente, 1);
-              }}
-            >
+            <button key={h} type="button" className="chip" onClick={() => aplicar({ ...formulario, q: h })}>
               {h}
             </button>
           ))}
@@ -550,12 +427,29 @@ export function Buscador() {
         </ul>
       ) : null}
 
-      {datos?.avisos.map((a) => (
-        <div key={a.mensaje} className={`aviso aviso-${a.tipo}`}>
-          <IconoAviso tamano={16} />
-          <span>{a.mensaje}</span>
+      {datos?.sugerirHistorico ? (
+        <div className="aviso aviso-atencion aviso-accionable" role="status">
+          <IconoReloj tamano={17} />
+          <span>
+            <strong>Esta consulta apunta a años anteriores a 1979.</strong> La base ordinaria del CENDOJ no los cubre:
+            esas resoluciones están en la colección histórica del Tribunal Supremo. Lo que se ve aquí puede ser solo una
+            parte.
+          </span>
+          <button type="button" onClick={() => aplicar({ ...formulario, historico: true })}>
+            <IconoReloj tamano={14} />
+            Buscar en el histórico
+          </button>
         </div>
-      ))}
+      ) : null}
+
+      {datos?.avisos
+        .filter((a) => a.clave !== 'sin-resultados')
+        .map((a) => (
+          <div key={a.mensaje} className={`aviso aviso-${a.tipo}`}>
+            {a.mensaje.includes('histórica') ? <IconoReloj tamano={16} /> : <IconoAviso tamano={16} />}
+            <span>{a.mensaje}</span>
+          </div>
+        ))}
 
       {cargando ? (
         <div className="lista-resultados" aria-busy="true" style={{ marginTop: 18 }}>
@@ -574,6 +468,7 @@ export function Buscador() {
                 <>
                   <strong>{datos.totalDeclarado.toLocaleString('es-ES')}</strong> resultados en CENDOJ
                   {datos.totalDeclarado > datos.maxRecuperable ? ` (entregables: ${datos.maxRecuperable})` : ''}
+                  {datos.historico ? ' · colección histórica del TS' : ''}
                 </>
               ) : (
                 'CENDOJ no ha devuelto un contador de resultados'
@@ -589,14 +484,11 @@ export function Buscador() {
           </div>
 
           {datos.resultados.length === 0 ? (
-            <div className="panel estado">
-              <IconoLupa tamano={32} />
-              <h2>Sin resultados en la fuente oficial</h2>
-              <p>
-                CENDOJ no devuelve ninguna resolución para esta consulta. Prueba con menos términos, quita filtros o
-                amplía el rango de fechas. Esta aplicación no completa la lista con resultados de otras fuentes.
-              </p>
-            </div>
+            <SinResultados
+              formulario={formulario}
+              urlOficial={datos.consultaEnviada.url}
+              onProbar={(f) => aplicar(f)}
+            />
           ) : (
             <ul className="lista-resultados">
               {datos.resultados.map((r) => (

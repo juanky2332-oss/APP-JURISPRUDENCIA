@@ -4,7 +4,14 @@ import { config, flags } from '@/lib/config';
 import { comprobarRateLimit, ipDePeticion } from '@/lib/ratelimit';
 import { desdeExcepcion, error, respuestaLimite } from '@/lib/respuestas';
 import { log } from '@/lib/logger';
-import { JURISDICCIONES, TIPOS_RESOLUCION, ORDENES } from '@/lib/cendoj/catalogos';
+import {
+  COLECCIONES,
+  JURISDICCIONES,
+  LOCALIZACIONES,
+  ORDENES,
+  SECCIONES_AUTO,
+  TIPOS_RESOLUCION,
+} from '@/lib/cendoj/catalogos';
 import type { Jurisdiccion, OrdenResultados, ParametrosBusqueda, RespuestaBusqueda } from '@/lib/tipos';
 
 export const runtime = 'nodejs';
@@ -13,6 +20,9 @@ export const dynamic = 'force-dynamic';
 const VALORES_JURISDICCION = new Set(JURISDICCIONES.map((j) => j.valor));
 const VALORES_TIPO_RES = new Set(TIPOS_RESOLUCION.map((t) => t.valor));
 const VALORES_ORDEN = new Set(ORDENES.map((o) => o.valor));
+const VALORES_LOCALIZACION = new Set(LOCALIZACIONES.map((l) => l.valor));
+const VALORES_COLECCION = new Set(COLECCIONES.map((c) => c.clave));
+const VALORES_SECCION_AUTO = new Set(SECCIONES_AUTO.map((s) => s.valor).filter((v) => v !== ''));
 
 function texto(sp: URLSearchParams, clave: string): string | undefined {
   const v = sp.get(clave);
@@ -56,6 +66,25 @@ export async function GET(req: Request): Promise<NextResponse> {
     return error('PARAMETROS_INVALIDOS', `Tipo de resolución no reconocido por CENDOJ: ${tipoInvalido}.`);
   }
 
+  const localizacion = texto(sp, 'localizacion');
+  if (localizacion && !VALORES_LOCALIZACION.has(localizacion)) {
+    return error('PARAMETROS_INVALIDOS', `Localización no reconocida por CENDOJ: ${localizacion}.`);
+  }
+
+  const colecciones = sp
+    .getAll('coleccion')
+    .map((v) => v.trim())
+    .filter((v) => v !== '');
+  const coleccionInvalida = colecciones.find((c) => !VALORES_COLECCION.has(c));
+  if (coleccionInvalida) {
+    return error('PARAMETROS_INVALIDOS', `Colección no reconocida por CENDOJ: ${coleccionInvalida}.`);
+  }
+
+  const seccionAuto = texto(sp, 'seccionAuto');
+  if (seccionAuto && !VALORES_SECCION_AUTO.has(seccionAuto)) {
+    return error('PARAMETROS_INVALIDOS', `Sección de destino no reconocida por CENDOJ: ${seccionAuto}.`);
+  }
+
   const desde = fechaIso(sp, 'fechaDesde');
   const hasta = fechaIso(sp, 'fechaHasta');
   if (desde.error) return error('PARAMETROS_INVALIDOS', desde.error);
@@ -73,7 +102,11 @@ export async function GET(req: Request): Promise<NextResponse> {
     tipoOrgano: texto(sp, 'tipoOrgano'),
     tiposResolucion: tiposResolucion.length > 0 ? tiposResolucion : undefined,
     seccion: texto(sp, 'seccion'),
+    seccionAuto,
     soloPleno: sp.get('soloPleno') === 'true',
+    localizacion,
+    colecciones: colecciones.length > 0 ? colecciones : undefined,
+    historico: sp.get('historico') === 'true',
     ecli: texto(sp, 'ecli'),
     roj: texto(sp, 'roj'),
     ponente: texto(sp, 'ponente'),
@@ -90,7 +123,8 @@ export async function GET(req: Request): Promise<NextResponse> {
 
   const hayAlgoQueBuscar = Object.entries(parametros).some(
     ([clave, valor]) =>
-      !['orden', 'pagina', 'porPagina', 'soloPleno'].includes(clave) &&
+      // `historico` no es un criterio: elige en qué base se busca, no qué se busca.
+      !['orden', 'pagina', 'porPagina', 'soloPleno', 'historico'].includes(clave) &&
       valor !== undefined &&
       valor !== '' &&
       !(Array.isArray(valor) && valor.length === 0),
